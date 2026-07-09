@@ -46,7 +46,7 @@ Make this image fundamentally different from previous variants: use a new scene 
       ?{
         model:process.env.ARK_IMAGE_MODEL||process.env.VOLCENGINE_IMAGE_MODEL||'doubao-seedream-3-0-t2i-250415',
         prompt,
-        size:process.env.ARK_IMAGE_SIZE||'1024x1024',
+        size:process.env.ARK_IMAGE_SIZE||'1536x2560',
         response_format:process.env.ARK_RESPONSE_FORMAT||'url',
         n:1
       }
