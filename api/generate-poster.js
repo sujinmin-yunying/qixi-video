@@ -20,7 +20,11 @@ const classDirection={
 
 export default async function handler(req,res){
   if(req.method!=='POST')return res.status(405).json({error:'Method not allowed'});
-  if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:'OPENAI_API_KEY is not configured'});
+  const provider=(process.env.IMAGE_PROVIDER||'').toLowerCase()||((process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY)?'ark':'openai');
+  const arkKey=process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY;
+  const openaiKey=process.env.OPENAI_API_KEY;
+  if(provider==='ark'&&!arkKey)return res.status(503).json({error:'ARK_API_KEY is not configured'});
+  if(provider!=='ark'&&!openaiKey)return res.status(503).json({error:'OPENAI_API_KEY is not configured'});
   const {film,variant=0,style='场景电影',className='电影'}=req.body||{};
   if(!film?.title)return res.status(400).json({error:'Missing film data'});
   const composition=compositions[variant%compositions.length];
@@ -35,11 +39,23 @@ No characters, people, portraits, faces, bodies, silhouettes or human reflection
 Do not use science-fiction, futuristic, cyberpunk, fantasy, cosmic, magical, holographic, system-like or technology-driven visuals unless explicitly present in the plot.
 Make this image fundamentally different from previous variants: use a new scene moment, camera angle, lens feeling, time of day, light source, object arrangement and color balance. Avoid abstract geometry, circles, frames, wire diagrams, icon-like shapes, flat gradients, UI graphics and empty vector design. The output must look like an actual illustrated movie scene, not a layout mockup. No typography, letters, logos or watermark.`;
   try{
-    const response=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-image-2',prompt,size:'1024x1536',quality:'medium',n:1})});
+    const endpoint=provider==='ark'
+      ?`${process.env.ARK_BASE_URL||'https://ark.cn-beijing.volces.com/api/v3'}/images/generations`
+      :'https://api.openai.com/v1/images/generations';
+    const body=provider==='ark'
+      ?{
+        model:process.env.ARK_IMAGE_MODEL||process.env.VOLCENGINE_IMAGE_MODEL||'doubao-seedream-3-0-t2i-250415',
+        prompt,
+        size:process.env.ARK_IMAGE_SIZE||'1024x1024',
+        response_format:process.env.ARK_RESPONSE_FORMAT||'url',
+        n:1
+      }
+      :{model:'gpt-image-2',prompt,size:'1024x1536',quality:'medium',n:1};
+    const response=await fetch(endpoint,{method:'POST',headers:{Authorization:`Bearer ${provider==='ark'?arkKey:openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await response.json();
     if(!response.ok){
-      const detail=[data.error?.type,data.error?.code,data.error?.message].filter(Boolean).join(' · ');
-      throw new Error(detail||`OpenAI image request failed with status ${response.status}`);
+      const detail=[data.error?.type,data.error?.code,data.error?.message,data.message,data.msg].filter(Boolean).join(' · ');
+      throw new Error(detail||`${provider==='ark'?'Volcengine Ark':'OpenAI'} image request failed with status ${response.status}`);
     }
     const item=data.data?.[0];
     const image=item?.b64_json?`data:image/png;base64,${item.b64_json}`:item?.url;
