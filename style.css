@@ -688,6 +688,33 @@ body{font-size:15px;line-height:1.7;background:var(--ui-bg);color:var(--ui-ink);
   border-color:#c4a46b88;
   color:#f0e7d7;
 }
+.fx-toggle.off{
+  color:#8f877b;
+  border-color:#ffffff14;
+  background:#00000024;
+  opacity:.78;
+}
+.fx-toggle.off:before{
+  content:"";
+  display:inline-block;
+  width:6px;
+  height:6px;
+  margin-right:6px;
+  border-radius:50%;
+  background:#7a7166;
+  vertical-align:1px;
+}
+.fx-toggle:not(.off):before{
+  content:"";
+  display:inline-block;
+  width:6px;
+  height:6px;
+  margin-right:6px;
+  border-radius:50%;
+  background:#c4a46b;
+  box-shadow:0 0 10px #c4a46b99;
+  vertical-align:1px;
+}
 #gallery .grid .tile .archive-card{
   grid-template-rows:24% 48% 28%!important;
 }

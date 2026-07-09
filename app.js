@@ -1,6 +1,6 @@
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
-const APP_VERSION='qixi-video-error-visible-20260709-2';
-let timer,posterCount=0,posterIndex=-1,stones=20,audioCtx,sfxBus,fxOn=true;
+const APP_VERSION='qixi-video-chat-aware-trailer-20260709-1';
+let timer,posterCount=0,posterIndex=-1,stones=20,audioCtx,sfxBus,fxOn=(()=>{try{return localStorage.getItem('movieFxOn')!=='0'}catch(e){return true}})();
 const posters=[
  {scene:'campus',title:'桃子汽水让给你',genre:'校园轻喜剧 · 今天',slogan:'喜欢不是让步，是记得你想要什么。',summary:'便利店冰柜前，两只手同时伸向最后一瓶桃子汽水。谁也不承认自己想让，争论却越来越像约会。',ending:'冰柜补货了。\n这次要不要一人一瓶？'},
  {scene:'noir',title:'今天不许硬撑',genre:'都市治愈片 · 今天',slogan:'先把今天过完，其他的我陪你排队。',summary:'周五下班前，一份过分具体的待办清单出现在聊天框。第一项是喝水，最后一项是一起吃夜宵。',ending:'清单还剩最后一项。\n你要不要现在下楼？'},
@@ -88,7 +88,53 @@ const storyFlavorBank=[
 ];
 function safeMovieText(s){return String(s).replace(/多年后|重逢|错过|告别|离开|分开|旧恋人|来不及|遗憾/g,m=>({多年后:'今天',重逢:'碰面',错过:'绕路',告别:'散场',离开:'走开一会儿',分开:'各忙各的',旧恋人:'熟悉的人',来不及:'差一点',遗憾:'小插曲'}[m]||m))}
 function safeTrailerText(s){return String(s).replace(/他们/g,'你和TA').replace(/两个人/g,'你和TA').replace(/你们/g,'你和TA').replace(/一个人/g,'你').replace(/另一个人/g,'TA').replace(/他\/她/g,'TA').replace(/她/g,'你').replace(/对方/g,'TA')}
-function buildFilm(){let selected=$('.types .selected')?.textContent?.trim()||'自动匹配',mapped={青春爱情:['校园爱情','campus'],都市治愈:['都市治愈','noir'],治愈日常:['日常陪伴','campus'],浪漫悬疑:['日常悬疑','noir'],公路电影:['小冒险','snow']}[selected],[type,scene]=mapped||pick(genreBank),flavor=pick(storyFlavorBank),era=pick(eraBank),tone=flavor.name,location=pick(locationBank[scene]),object=pick(objectBank[scene]),relation=pick(relationBank),deadline=pick(deadlineBank),base=posters.find(p=>p.scene===scene)||posters[0],core=uniqueCore(scene,type,location,object,relation,deadline,tone,flavor),title=newTitle({scene,type,location,object,flavor,texture:core.texture}),words=[location,object,deadline,core.secret,core.texture,flavor.name,...filmDetails[scene].words,'今天','刚刚','哈哈哈','别嘴硬','下次一起','我在','早点睡'];
+let importedChatText='',importedChatName='';
+function cleanChatLine(s){return String(s||'').replace(/\[[^\]]{1,32}\]|\d{1,2}:\d{2}(:\d{2})?|20\d{2}[\/\-年.]\d{1,2}[\/\-月.]\d{1,2}日?/g,'').replace(/^.{1,12}[:：]\s*/,'').replace(/\s+/g,' ').trim()}
+function getChatInput(){return String(importedChatText||$('#chat-paste')?.value||'').trim()}
+function hasAny(text,arr){return arr.some(w=>text.includes(w))}
+function uniq(arr){let s=new Set;return arr.filter(x=>x&&!s.has(x)&&s.add(x))}
+function scoreWords(text,arr){return arr.reduce((n,w)=>n+(text.match(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length,0)}
+function analyzeChat(raw){let text=String(raw||'').slice(-18000),compact=text.replace(/\s+/g,''),lines=text.split(/\n+/).map(cleanChatLine).filter(l=>l.length>=2&&l.length<=36&&!/^https?:|^\[?(图片|表情|语音|文件)\]?$/i.test(l)),bank=[
+ ['奶茶',/奶茶|少冰|全糖|珍珠|椰果|吸管|桃子|汽水/,'一杯奶茶','奶茶店门口','奶茶冰块化掉前'],
+ ['晚安',/晚安|睡了|困了|别熬夜|早点睡|睡不着|失眠/,'手机屏幕','窗边床头','灯关掉以前'],
+ ['吃饭',/吃饭|晚饭|夜宵|外卖|饿|火锅|早餐|午饭/,'外卖袋','街角小店','外卖凉掉以前'],
+ ['下雨',/下雨|雨|伞|淋湿|天气/,'一把伞','便利店门口','雨停以前'],
+ ['工作',/上班|下班|加班|老板|同事|开会|工位|公司|摸鱼/,'工牌挂绳','公司电梯口','下班打卡前'],
+ ['学习',/考试|作业|上课|老师|学校|自习|图书馆|毕业|论文/,'课桌上的草稿纸','自习室门口','晚自习铃响前'],
+ ['猫狗',/猫|小猫|狗|狗狗|宠物|喵|汪/,'小猫贴纸','小区楼下','猫钻进花坛前'],
+ ['游戏',/游戏|上号|副本|抽卡|排位|开黑|输赢/,'一张表情包截图','聊天框里','这局结束前'],
+ ['出门',/地铁|公交|车站|打车|回家|到家|路上|定位/,'钥匙扣','地铁站口','末班车来以前'],
+ ['电影',/电影|影院|票|放映|剧|追剧/,'电影票根','电影院后排','电影开场前'],
+ ['生病',/医院|感冒|发烧|药|头疼|胃疼|不舒服/,'一袋退烧药','医院走廊','药效上来以前']
+ ],hits=bank.filter(b=>b[1].test(text)),kw=uniq(hits.map(h=>h[0]).concat((compact.match(/晚安|哈哈哈?|想你|抱抱|辛苦|在吗|到家|别熬夜|奶茶|下雨|吃饭|睡觉|上班|加班|考试|猫|电影|游戏|语音|表情包|撤回|笨蛋|哼|才没有|顺路|陪你/g)||[]))).slice(0,16);
+ let scores={甜味轻喜剧:scoreWords(compact,['哈哈','笑死','可爱','好吃','奶茶','开心','亲亲','抱抱']),暧昧拉扯片:scoreWords(compact,['才没有','你猜','哼','随便','顺路','想你','在吗','撤回','等你','嘴硬']),沙雕恋爱片:scoreWords(compact,['笑死','哈哈哈','离谱','笨蛋','无语','救命','哈哈','别闹']),双向守护片:scoreWords(compact,['辛苦','累','没事','别熬夜','陪你','抱抱','吃药','喝水','不舒服']),日常陪伴片:scoreWords(compact,['晚安','到家','吃饭','今天','睡了','早安','在呢']),夜谈治愈片:scoreWords(compact,['睡不着','失眠','难受','不开心','哭','烦','累','没事']),小冒险片:scoreWords(compact,['出门','路上','打车','地铁','找','迷路','猫','回家']),朋友以上片:scoreWords(compact,['普通朋友','懂你','记得','习惯','口味','下次','一起'])};
+ let flavorName=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0]?.[0]||'日常陪伴片';if(!text.trim()||scores[flavorName]===0)flavorName='';
+ let scene=hasAny(compact,['上班','下班','公司','医院','地铁','咖啡'])?'noir':hasAny(compact,['车站','出门','路上','旅行','猫','回家'])?'snow':hasAny(compact,['学校','考试','作业','图书馆','上课','奶茶'])?'campus':'campus';
+ let type={甜味轻喜剧:'轻喜剧',暧昧拉扯片:'都市爱情',沙雕恋爱片:'误会喜剧',双向守护片:'都市治愈',日常陪伴片:'日常陪伴',夜谈治愈片:'夜谈治愈',小冒险片:'小冒险',朋友以上片:'友情亲密'}[flavorName]||'生活流';
+ let hit=hits[0],object=hit?.[2],location=hit?.[3],deadline=hit?.[4],phrase=lines.find(l=>/[？?！!～~]|哈哈|晚安|想你|睡|到家|别|你|TA|我/.test(l))||lines[0]||'',talkRatio=(compact.match(/哈哈|笑|救命|离谱|无语|笨蛋|哼/g)||[]).length;
+ let relation=talkRatio>4?'一边互怼一边靠近的你和TA':scores.暧昧拉扯片>2?'明明在意却都不肯先说破的你和TA':scores.双向守护片>2||scores.夜谈治愈片>2?'把照顾藏进日常回复里的你和TA':'每天用小事互相陪着的你和TA';
+ return{hasChat:!!text.trim(),keywords:kw,phrase,flavor:flavorName,type,scene,object,location,deadline,relation,texture:phrase?`聊天里反复出现的“${phrase.slice(0,18)}”`:'聊天框亮了一下',secret:kw[0]?`那句关于${kw[0]}的小玩笑`:'一条被认真接住的消息'}}
+function chatTeaser(chat,ctx){let p=chat.phrase?`“${chat.phrase.slice(0,22)}”`:ctx.object,forms={
+  甜味轻喜剧:`你和TA本来只是聊${chat.keywords[0]||ctx.object}，却认真争到谁先笑场。${p}后来成了整部电影最甜的证据。`,
+  暧昧拉扯片:`你和TA都没有把话说满，只把${ctx.object}推来推去。最危险的一秒，是聊天框停在“正在输入”。`,
+  沙雕恋爱片:`一场关于${chat.keywords[0]||ctx.object}的离谱争论，把你和TA的聊天变成恋爱判罚现场。谁先破功，谁就输了。`,
+  双向守护片:`你说没事，TA没有拆穿，只把${ctx.object}和一句很具体的提醒放到你面前。电影从这里开始变暖。`,
+  夜谈治愈片:`那晚你和TA没有聊什么大事，只是一句一句把坏情绪说轻。${p}被留在了片头。`,
+  日常陪伴片:`你和TA的聊天没有大事件，只有反复出现的${chat.keywords[0]||'晚安'}、报备和小玩笑。可电影偏偏从这些地方开始。`,
+  小冒险片:`你和TA本来只想处理${ctx.object}，结果被一条消息带着绕远。普通一天忽然有了剧情。`,
+  朋友以上片:`你和TA都说这只是习惯，可${ctx.object}、口味和回复时间已经替你们说漏了太多。`
+};return safeMovieText(forms[ctx.flavor.name]||forms.日常陪伴片).slice(0,92)}
+function makeTrailerLines(ctx){let{title,flavor,location,object,deadline,chat,core}=ctx,p=chat.phrase?`“${chat.phrase.slice(0,18)}”`:'“你是不是又嘴硬？”',key=chat.keywords[0]||object,sets={
+  甜味轻喜剧:[[`${object}被放在你和TA中间。`,`你们开始翻聊天记录找证据。`,p,`TA先笑了，却说是你赢。`,`《${title}》 喜欢，是记得你的口味。`]],
+  暧昧拉扯片:[[`你把消息删掉，又重新输入。`,`${location}的灯亮着，${object}没被拿走。`,p,`TA说只是顺路，你没有拆穿。`,`《${title}》 有些靠近，故意慢半拍。`]],
+  沙雕恋爱片:[[`${deadline}，你和TA定下一条怪规则。`,`谁先提到${key}，谁就请客。`,p,`聊天框沉默三秒，然后同时破功。`,`《${title}》 认真搞笑的人，最先露馅。`]],
+  双向守护片:[[`你说没事。`,`TA把${object}放到你面前。`,p,`${core.texture}。`,`《${title}》 今天先别一个人硬撑。`]],
+  夜谈治愈片:[[`房间只剩手机屏幕亮着。`,`你发来的消息停在${key}。`,p,`TA没有催，只回了很轻的一句。`,`《${title}》 晚安不是自动回复。`]],
+  日常陪伴片:[[`你和TA又聊到很晚。`,`${object}旁边，聊天框还亮着。`,p,`没有大事，可谁都没舍得先走。`,`《${title}》 普通一天，也值得放映。`]],
+  小冒险片:[[`${deadline}，你和TA临时出门。`,`本来只是为了${object}。`,p,`路线错了，笑声却没停。`,`《${title}》 绕远路也算约会。`]],
+  朋友以上片:[[`你说只是普通聊天。`,`TA却记得${key}和你的习惯。`,p,`${object}被自然地推到你这边。`,`《${title}》 不定义，也很亲近。`]]
+};return pick(sets[flavor.name]||sets.日常陪伴片).map(s=>safeTrailerText(safeMovieText(s)))}
+function buildFilm(){let chat=analyzeChat(getChatInput()),selected=$('.types .selected')?.textContent?.trim()||'自动匹配',mapped={青春爱情:['校园爱情','campus'],都市治愈:['都市治愈','noir'],治愈日常:['日常陪伴','campus'],浪漫悬疑:['日常悬疑','noir'],公路电影:['小冒险','snow']}[selected],[type,scene]=mapped||(chat.hasChat?[chat.type,chat.scene]:pick(genreBank)),flavor=storyFlavorBank.find(f=>f.name===chat.flavor)||pick(storyFlavorBank),era=pick(eraBank),tone=flavor.name,location=chat.location||pick(locationBank[scene]),object=chat.object||pick(objectBank[scene]),relation=chat.relation||pick(relationBank),deadline=chat.deadline||pick(deadlineBank),base=posters.find(p=>p.scene===scene)||posters[0],core=uniqueCore(scene,type,location,object,relation,deadline,tone,flavor);if(chat.hasChat){core.texture=chat.texture||core.texture;core.secret=chat.secret||core.secret;core.firstImage=`${location}里，${object}旁边还留着聊天里那句${chat.phrase?`“${chat.phrase.slice(0,18)}”`:'没有说完的话'}。`}let title=newTitle({scene,type,location,object,flavor,texture:chat.phrase||core.texture}),words=uniq([...(chat.keywords||[]),location,object,deadline,core.secret,core.texture,flavor.name,...filmDetails[scene].words,'今天','刚刚','哈哈哈','别嘴硬','下次一起','我在','早点睡']).slice(0,28);
  let teaserByFlavor={
   甜味轻喜剧:[`${relation}因为${object}吵了二十分钟，最后发现问题不在口味，而在谁先偷偷记住了谁的偏好。`,`${location}今天多了一条奇怪规矩：谁先笑场，谁就负责把${object}让给对方。`],
   日常陪伴片:[`她说自己马上睡，十分钟后又发来一句“你在吗”。于是${location}的灯，被悄悄多留了一会儿。`,`${deadline}前，${relation}照例互相报备小事。真正的剧情，是谁都没发现这已经成了习惯。`],
@@ -100,8 +146,8 @@ function buildFilm(){let selected=$('.types .selected')?.textContent?.trim()||'�
   朋友以上片:[`他们都说只是普通朋友，可${location}的新规矩、${object}的摆放位置，对方比本人还清楚。`,`${relation}的亲密没有名字。它藏在${deadline}前准时出现的提醒，和一句过分自然的“我知道”。`],
   职场小甜片:[`电梯到一楼前，他/她发现对方连自己咖啡少糖都记得。成年人装不熟，原来也会失败。`,`${location}的打印机又卡纸了。两个人一起修了十分钟，却谁也没提真正卡住的是聊天框。`],
   夜谈治愈片:[`${deadline}，她说今天不太好。对方没有讲大道理，只把聊天框一点点整理成能睡着的样子。`,`${location}安静下来以后，只有手机屏幕还亮着。那句“我在”，比任何安慰都来得准时。`]
- },summary=safeMovieText(pick(teaserByFlavor[flavor.name]||teaserByFlavor.甜味轻喜剧)).slice(0,92);
- let long=safeMovieText(`${flavor.name}的节奏里，电影从${location}的一件小事开始：${core.firstImage} ${relation}没有遇到宏大的难题，只是被${core.mystery}这种普通又具体的问题困住。镜头反复拍${object}、${core.texture}和几次差点接上的对话，让观众慢慢看见他们如何把今天过得更靠近一点。`);
+ },summary=chat.hasChat?chatTeaser(chat,{flavor,object,location}):safeMovieText(pick(teaserByFlavor[flavor.name]||teaserByFlavor.甜味轻喜剧)).slice(0,92);
+ let long=safeMovieText(chat.hasChat?`这部电影从你和TA的聊天记录里长出来：${chat.keywords.slice(0,5).join('、')||object}，还有那句${chat.phrase?`“${chat.phrase.slice(0,24)}”`:'被认真接住的话'}。它不把关系写成大起大落，只拍${location}、${object}和几次差点说破又绕回日常的回复。观众会看到的不是模板爱情，而是你和TA之间那种具体、别扭、又很难复制的相处方式。`:`${flavor.name}的节奏里，电影从${location}的一件小事开始：${core.firstImage} ${relation}没有遇到宏大的难题，只是被${core.mystery}这种普通又具体的问题困住。镜头反复拍${object}、${core.texture}和几次差点接上的对话，让观众慢慢看见他们如何把今天过得更靠近一点。`);
  let actPool={
   甜味轻喜剧:[['开场',`奶茶归属案`,`${era} · ${location}`,`${object}被拿错以后，${relation}开始像小学生一样翻聊天记录找证据。一个说“你上次明明说过少冰”，另一个坚持“截图不能断章取义”。`],['转折',`谁先笑谁输`,`中段 · ${deadline}`,`争论升级成临时比赛：谁先笑场谁道歉。结果路过的店员念错名字，两个人同时破功，连刚刚准备好的狠话都没机会说完。`],['终章',`杯套没有扔`,`夜晚 · ${location}`,`事情解决后，${object}的包装被折得整整齐齐。镜头最后拍到杯套背面，那里多了一行很小的字：下次换你选。`]],
   日常陪伴片:[['开场',`第十五分钟回来的人`,`今晚 · ${location}`,`一句“我睡了”发出去后，聊天框安静了十五分钟。然后对方又回来补一句很小的事，像一只嘴硬的猫绕回门口。`],['转折',`灯被提前留好`,`深夜 · ${deadline}`,`另一个人开始提前准备回复：热水、待办、今天的笑话，还有一句不催人的“慢慢说”。生活没有大事件，只是坏情绪被接住了。`],['终章',`晚安不是结束`,`凌晨 · 手机屏幕`,`最后谁也没有正式道谢。屏幕暗下去前，聊天框停在一句很普通的“明天见”，却像把灯留到了天亮。`]],
@@ -138,15 +184,8 @@ function buildFilm(){let selected=$('.types .selected')?.textContent?.trim()||'�
   `灯亮前，镜头回到${location}。店员把${object}收进失物招领盒，盒子上贴着一行新字：两个人的东西，请两个人一起来拿。`,
   `片尾最后一秒，手机弹出一条新提醒：明天 ${deadline.replace('前','')}，同一地点。备注只有四个字：别再嘴硬。`
  ],ending=safeMovieText(pick(endingPool));
- let dialogue=pick([`TA说：“你每次都说今天。”`,`你问TA：“这也要分胜负吗？”`,`TA低声说：“你是不是又嘴硬？”`,`你看着TA：“那你为什么记得这么清楚？”`,`你说：“我没有需要陪……等一下。”`,`TA问你：“这算约会吗？不算也行。”`]);
- let hook=pick(flavor.hooks);
- let trailerLines=pick([
-  [`${location}前，${object}被摆在你和TA中间。`,`${core.texture}。`,dialogue,`你在聊天框里删掉三个字，改发一个表情。`,`${deadline}，你和TA定下的临时规则突然失效。`,`《${title}》 ${hook}`],
-  [`你和TA同时伸手，碰到了同一个${object}。`,`TA迅速收回手，假装看别处。`,dialogue,`你们开始翻聊天记录找证据。`,`最后，证据反而证明TA太懂你的习惯。`,`《${title}》 ${hook}`],
-  [`电梯门合上前，TA替你按住开门键。`,`${object}被TA塞进你手里。`,`TA说：“我只是刚好多买。”`,`手机屏幕亮起：你到哪了？`,`这一次，你没有急着解释。`,`《${title}》 ${hook}`],
-  [`夜里，${location}只剩一盏灯。`,`你发来的语音播到一半，TA听见你很轻地笑。`,dialogue,`${object}旁边多了一张写给你的便签。`,`镜头切黑前，TA回了一个“好”。`,`《${title}》 ${hook}`],
-  [`外卖袋被风吹得哗啦响。`,`你和TA蹲在路边研究${object}。`,`你问：“我们是不是有点幼稚？”`,`下一秒，TA和你同时说：“没有。”`,`这一天突然变得很像你们的电影。`,`《${title}》 ${hook}`]
- ]).map(s=>safeTrailerText(safeMovieText(s)));
+ let hook=chat.hasChat?(flavor.hooks.find(Boolean)||'普通一天，也值得放映。'):pick(flavor.hooks);
+ let trailerLines=makeTrailerLines({title,flavor,location,object,deadline,chat,core});
  let slogan=safeMovieText(hook),posterClass=posterClassFor(type,scene);
  return{...base,title,titleCandidates:newTitle.lastCandidates||[],type,era,tone,storyFlavor:flavor.name,location,object,relation,deadline,posterClass,genre:`${type} · ${flavor.name}`,slogan,summary,logline:summary,long,words,quotes,acts,behind,actorNotes,ending,trailerLines,scene,archiveId:'FILM-'+Date.now().toString(36).toUpperCase()}}
 function show(id){$$('.page').forEach(x=>x.classList.remove('active'));$('#'+id).classList.add('active');scrollTo(0,0);sfx('page')}
@@ -205,7 +244,7 @@ function motifType(o){if(/伞/.test(o))return'umbrella';if(/车票|口供|信|�
 function drawMotif(x,o,cx,cy,s,color){let k=motifType(o);x.save();x.translate(cx,cy);x.scale(s,s);x.strokeStyle=color;x.fillStyle=color;x.lineWidth=7;x.lineCap='round';if(k==='umbrella'){x.beginPath();x.arc(0,0,90,Math.PI,0);x.stroke();x.beginPath();x.moveTo(0,0);x.lineTo(0,130);x.quadraticCurveTo(0,170,35,155);x.stroke()}else if(k==='paper'||k==='ticket'||k==='letter'){x.strokeRect(-85,-115,170,230);x.lineWidth=3;for(let i=0;i<5;i++){x.beginPath();x.moveTo(-55,-65+i*32);x.lineTo(50,-65+i*32);x.stroke()}}else if(k==='headphone'){x.beginPath();x.arc(0,0,90,Math.PI,0);x.stroke();x.strokeRect(-105,-8,35,85);x.strokeRect(70,-8,35,85)}else if(k==='phone'){x.beginPath();x.arc(0,0,90,0,7);x.stroke();x.strokeRect(-55,-125,110,250);x.beginPath();x.moveTo(-55,100);x.bezierCurveTo(-160,180,140,190,55,100);x.stroke()}else if(k==='film'){for(let i=-2;i<3;i++){x.strokeRect(i*45-18,-18,36,36)}x.beginPath();x.moveTo(-120,-45);x.lineTo(120,-45);x.moveTo(-120,45);x.lineTo(120,45);x.stroke()}else if(k==='glove'){x.beginPath();x.moveTo(-55,90);x.lineTo(-75,-20);x.lineTo(-52,-115);x.lineTo(-25,-25);x.lineTo(-15,-130);x.lineTo(12,-28);x.lineTo(28,-120);x.lineTo(48,-20);x.lineTo(62,-92);x.lineTo(78,15);x.lineTo(48,90);x.closePath();x.stroke()}else if(k==='pod'){x.beginPath();x.ellipse(0,0,120,60,0,0,7);x.stroke();x.strokeRect(-145,-85,290,170)}else if(k==='ribbon'){x.beginPath();x.moveTo(-130,40);x.bezierCurveTo(-50,-160,55,170,140,-30);x.stroke()}else if(k==='cup'){x.strokeRect(-70,-65,125,130);x.beginPath();x.arc(60,0,45,-1.4,1.4);x.stroke()}else if(k==='clock'){x.beginPath();x.arc(0,0,100,0,7);x.stroke();x.beginPath();x.moveTo(0,0);x.lineTo(5,-62);x.moveTo(0,0);x.lineTo(45,30);x.stroke()}else if(k==='rose'){for(let i=0;i<5;i++){x.save();x.rotate(i*1.25);x.beginPath();x.ellipse(0,-45,38,70,0,0,7);x.stroke();x.restore()}x.beginPath();x.moveTo(0,40);x.lineTo(0,160);x.stroke()}else if(k==='rings'){x.beginPath();x.arc(-42,0,70,0,7);x.arc(42,0,70,0,7);x.stroke()}else{x.strokeRect(-95,-75,190,150)}x.restore()}
 function drawEnvironment(x,scene,W,H,pal,r){x.fillStyle=pal[0];x.fillRect(0,H*.63,W,H*.37);x.fillStyle=pal[1];if(scene==='campus'){for(let i=0;i<11;i++)x.fillRect(60+i*12,H*.34+i*68,W-120-i*24,5)}if(scene==='noir'){for(let i=0;i<7;i++)x.fillRect(80+i*115,280+r()*300,70,720-r()*220);x.fillStyle=pal[2];x.fillRect(330,520,240,430)}if(scene==='space'){x.beginPath();x.arc(W*.62,H*.43,280,0,7);x.fill();x.strokeStyle=pal[2];x.lineWidth=15;x.beginPath();x.arc(W*.62,H*.43,360,0,7);x.stroke()}if(scene==='snow'){x.beginPath();x.moveTo(0,780);x.lineTo(230,430);x.lineTo(450,760);x.lineTo(670,350);x.lineTo(W,760);x.closePath();x.fill();x.fillStyle=pal[2];x.fillRect(230,850,440,170)}if(scene==='gothic'){x.fillRect(170,220,560,900);x.strokeStyle=pal[2];x.lineWidth=12;for(let i=0;i<4;i++){x.beginPath();x.arc(W/2,340+i*230,310-i*30,Math.PI,0);x.stroke()}}}
 function syncAudioButtons(){
- $$('.fx-toggle').forEach(b=>b.textContent=fxOn?'✧ 音效开':'✧ 音效关')
+ $$('.fx-toggle').forEach(b=>{b.textContent=fxOn?'✧ 音效开':'✧ 音效关';b.classList.toggle('off',!fxOn);b.setAttribute('aria-pressed',fxOn?'true':'false');b.title=fxOn?'点击关闭交互音效':'点击开启交互音效'})
 }
 let importedRoles=[];
 function escHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -220,11 +259,12 @@ window.addEventListener('message',e=>{let d=e.data||{};if(d.type==='movie:charac
 function collectRoles(){let roles=[];try{roles=normalizeRoles(window.AppBridge?.getCharacters?.()||window.NativeApp?.getCharacters?.())}catch(e){}if(!roles.length)roles=readWindowRoles();if(!roles.length)roles=readStoredRoles();importedRoles=roles;return roles}
 function renderRoleList(from='App'){let box=$('.role-list'),status=$('.role-status');if(!box)return;let roles=importedRoles.length?importedRoles:collectRoles();if(status)status.textContent=$('#them').value.trim()?`已选择 · ${$('#them').value.trim()}`:(roles.length?`检测到 ${roles.length} 个 App 角色`:'未选择角色 · 可手动填写');if(!roles.length){box.innerHTML='<div class="role-empty"><b>还没有读取到 App 角色</b><p>请确认 App 已把角色列表注入页面；你也可以先手动填写 TA 的名字。</p></div>';requestNativeRoles();return}box.innerHTML=roles.map((r,i)=>`<button class="role-option" data-i="${i}"><span>${r.avatar?`<img src="${escHtml(r.avatar)}" alt="">`:escHtml(r.name.slice(0,1))}</span><strong>${escHtml(r.name)}</strong><small>${escHtml(r.desc||'从 App 角色列表导入')}</small></button>`).join('');$$('.role-option').forEach(b=>b.onclick=()=>{let r=roles[+b.dataset.i];$('#them').value=r.name;$('.role-status').textContent=`已选择 · ${r.name}`;$('.role-drawer').classList.remove('open');$('.role-drawer').setAttribute('aria-hidden','true');sfx('click')})}
 function applyInitialRoleFromApp(){let p=new URLSearchParams(location.search),name=p.get('roleName')||p.get('characterName')||p.get('role')||p.get('character');if(name){$('#them').value=name.slice(0,12);$('.role-status').textContent=`已导入当前角色 · ${$('#them').value}`}}
-function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();sfxBus=audioCtx.createGain();sfxBus.gain.value=fxOn?1:0;sfxBus.connect(audioCtx.destination);syncAudioButtons()}
-function setFx(on){fxOn=on;if(audioCtx){sfxBus.gain.value=on?1:0}syncAudioButtons()}
-function tone(freq,dur=.36,type='sine',gain=.012,delay=0){let now=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain(),f=audioCtx.createBiquadFilter();o.type='sine';o.frequency.value=freq;f.type='lowpass';f.frequency.value=1180;g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(gain,now+.14);g.gain.setValueAtTime(gain,now+Math.max(.16,dur*.45));g.gain.linearRampToValueAtTime(0,now+dur+.16);o.connect(f).connect(g).connect(sfxBus);o.start(now);o.stop(now+dur+.28)}
-function sfx(type){if(!fxOn)return;if(!audioCtx)initAudio();audioCtx.resume?.();if(type==='magic'){[392,493.88].forEach((f,i)=>tone(f,.52,'sine',.009,i*.12));return}if(type==='deny'){tone(246.94,.42,'sine',.008);return}if(type==='page'){tone(329.63,.48,'sine',.007);return}if(type==='soft'){return}tone(440,.34,'sine',.007)}
-$$('.fx-toggle').forEach(b=>b.onclick=()=>{setFx(!fxOn);if(fxOn)sfx('click')});
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();sfxBus=audioCtx.createGain();sfxBus.gain.value=fxOn?.9:0;sfxBus.connect(audioCtx.destination);syncAudioButtons()}
+function setFx(on){fxOn=!!on;try{localStorage.setItem('movieFxOn',fxOn?'1':'0')}catch(e){}if(!audioCtx&&fxOn)initAudio();if(audioCtx){let now=audioCtx.currentTime;sfxBus.gain.cancelScheduledValues(now);sfxBus.gain.linearRampToValueAtTime(fxOn?.9:0,now+.08)}syncAudioButtons()}
+function tone(freq,dur=.12,type='sine',gain=.026,delay=0,filter=1800){if(!audioCtx||!sfxBus)return;let now=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain(),f=audioCtx.createBiquadFilter();o.type=type;o.frequency.setValueAtTime(freq,now);f.type='lowpass';f.frequency.value=filter;g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(Math.max(gain,0.0002),now+.018);g.gain.exponentialRampToValueAtTime(0.0001,now+dur);o.connect(f).connect(g).connect(sfxBus);o.start(now);o.stop(now+dur+.03)}
+function sweep(from,to,dur=.22,gain=.022,delay=0){if(!audioCtx||!sfxBus)return;let now=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain(),f=audioCtx.createBiquadFilter();o.type='sine';o.frequency.setValueAtTime(from,now);o.frequency.exponentialRampToValueAtTime(to,now+dur);f.type='lowpass';f.frequency.value=2200;g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(gain,now+.025);g.gain.exponentialRampToValueAtTime(0.0001,now+dur);o.connect(f).connect(g).connect(sfxBus);o.start(now);o.stop(now+dur+.04)}
+function sfx(type){if(!fxOn)return;if(!audioCtx)initAudio();audioCtx.resume?.();if(type==='magic'){tone(523.25,.15,'sine',.026,0,2600);tone(659.25,.18,'sine',.022,.075,2600);sweep(783.99,1046.5,.32,.018,.15);return}if(type==='deny'){tone(220,.12,'triangle',.025,0,900);tone(174.61,.18,'triangle',.018,.09,800);return}if(type==='page'){sweep(392,587.33,.18,.023,0);tone(783.99,.10,'sine',.014,.11,2400);return}if(type==='soft'){tone(329.63,.10,'sine',.012,0,1800);return}tone(587.33,.055,'triangle',.028,0,2200);tone(880,.07,'sine',.016,.045,2600)}
+$$('.fx-toggle').forEach(b=>b.onclick=()=>{let next=!fxOn;if(next){setFx(true);sfx('page')}else{sfx('soft');setTimeout(()=>setFx(false),80)}});
 syncAudioButtons();
 $$('.types button').forEach(b=>b.onclick=()=>{$$('.types button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');sfx('click')});
 $('.role-open').onclick=()=>{renderRoleList();$('.role-drawer').classList.add('open');$('.role-drawer').setAttribute('aria-hidden','false');sfx('page')};
@@ -232,8 +272,10 @@ $('.role-close').onclick=()=>{$('.role-drawer').classList.remove('open');$('.rol
 $('.role-refresh').onclick=()=>{importedRoles=[];renderRoleList();sfx('click')};
 $('#them').addEventListener('input',()=>{$('.role-status').textContent=$('#them').value.trim()?`手动填写 · ${$('#them').value.trim()}`:'未选择角色 · 可手动填写'});
 $('.import-open').onclick=()=>{$('.import-drawer').classList.add('open');$('.import-drawer').setAttribute('aria-hidden','false');sfx('page')};$('.drawer-close').onclick=()=>$('.import-drawer').classList.remove('open');
-$('#chat-file').onchange=e=>{let f=e.target.files[0];if(f){$('.import-status').textContent=`已选择 · ${f.name}`;$('.import-confirm').textContent='完成导入'}};
-$('.import-confirm').onclick=()=>{let f=$('#chat-file').files[0],p=$('#chat-paste').value.trim();if(!f&&!p){$('.import-confirm').textContent='请先选择或粘贴聊天记录';sfx('deny');return}$('.import-drawer').classList.remove('open');$('.import-status').textContent=f?`已导入 · ${f.name}`:`已导入 · ${p.length} 个字`;sfx('magic')};
+function readChatFile(file){return new Promise((resolve,reject)=>{let r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(r.error||new Error('读取文件失败'));r.readAsText(file,'utf-8')})}
+$('#chat-file').onchange=async e=>{let f=e.target.files[0];if(!f)return;$('.import-status').textContent=`正在读取 · ${f.name}`;$('.import-confirm').textContent='正在读取…';try{importedChatText=await readChatFile(f);importedChatName=f.name;$('.import-status').textContent=`已读取 · ${f.name} · ${importedChatText.length} 个字`;$('.import-confirm').textContent='完成导入'}catch(err){importedChatText='';importedChatName='';$('.import-status').textContent='读取失败，请改用粘贴聊天记录';$('.import-confirm').textContent='重新导入';sfx('deny')}};
+$('#chat-paste').addEventListener('input',()=>{let p=$('#chat-paste').value.trim();if(p){importedChatText=p;importedChatName='粘贴内容';$('.import-status').textContent=`已读取粘贴内容 · ${p.length} 个字`;$('.import-confirm').textContent='完成导入'}});
+$('.import-confirm').onclick=()=>{let f=$('#chat-file').files[0],p=$('#chat-paste').value.trim();if(p){importedChatText=p;importedChatName='粘贴内容'}if(!importedChatText&&!p&&!f){$('.import-confirm').textContent='请先选择或粘贴聊天记录';sfx('deny');return}if(f&&!importedChatText){$('.import-confirm').textContent='文件还在读取，请稍等';sfx('deny');return}$('.import-drawer').classList.remove('open');$('.import-status').textContent=importedChatName?`已导入 · ${importedChatName} · 将按聊天内容生成影片`:`已导入 · ${importedChatText.length} 个字 · 将按聊天内容生成影片`;sfx('magic')};
 $('#start').onclick=()=>{initAudio();play()};$('.skip').onclick=()=>{clearTimeout(timer);show('hub')};$('.poster-generate').onclick=generatePoster;
 $$('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));$$('.back').forEach(b=>b.onclick=()=>show('hub'));$$('.home').forEach(b=>b.onclick=()=>show('landing'));$('.next').onclick=()=>show('landing');
 const labels=['电影主海报','纪念电影票','镜头特写一','台词对白卡一','NG幕后花絮','镜头特写二','主演手札','台词对白卡二','片尾谢幕彩蛋'];
