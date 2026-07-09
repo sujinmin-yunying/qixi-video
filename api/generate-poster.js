@@ -37,10 +37,13 @@ Make this image fundamentally different from previous variants: use a new scene 
   try{
     const response=await fetch('https://api.openai.com/v1/images/generations',{method:'POST',headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-image-2',prompt,size:'1024x1536',quality:'medium',n:1})});
     const data=await response.json();
-    if(!response.ok)throw new Error(data.error?.message||'Image API request failed');
+    if(!response.ok){
+      const detail=[data.error?.type,data.error?.code,data.error?.message].filter(Boolean).join(' · ');
+      throw new Error(detail||`OpenAI image request failed with status ${response.status}`);
+    }
     const item=data.data?.[0];
     const image=item?.b64_json?`data:image/png;base64,${item.b64_json}`:item?.url;
     if(!image)throw new Error('No image returned');
     return res.status(200).json({image});
-  }catch(error){return res.status(500).json({error:error.message})}
+  }catch(error){return res.status(500).json({error:error.message||'Poster generation failed'})}
 }
