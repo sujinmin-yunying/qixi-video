@@ -1419,6 +1419,63 @@ body{font-size:15px;line-height:1.7;background:var(--ui-bg);color:var(--ui-ink);
   }
 }
 
+/* 2026-07-14 ticket DOM export consistency: preview node is the export source */
+.ticket-thumb{
+  overflow:hidden!important;
+  background:#d5c3aa!important;
+}
+.ticket-thumb img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+  border-radius:inherit!important;
+}
+.ticket-barcode,
+.ticket-qr{
+  background:none!important;
+  padding:0!important;
+  display:block!important;
+  flex:0 0 auto!important;
+  overflow:hidden!important;
+}
+.ticket-barcode{
+  width:148px!important;
+  height:40px!important;
+}
+.ticket-qr{
+  width:72px!important;
+  height:72px!important;
+  border:0!important;
+  box-shadow:0 0 0 1px #222!important;
+  image-rendering:pixelated!important;
+  image-rendering:crisp-edges!important;
+}
+.ticket-barcode svg,
+.ticket-qr svg{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  transform:none!important;
+  filter:none!important;
+  image-rendering:pixelated!important;
+  image-rendering:crisp-edges!important;
+}
+.ticket-barcode-svg,
+.ticket-qr-svg{
+  shape-rendering:crispEdges!important;
+}
+@media(max-width:760px){
+  .ticket-barcode{
+    width:74px!important;
+    height:28px!important;
+  }
+  .ticket-qr{
+    width:50px!important;
+    height:50px!important;
+  }
+}
+
 /* Final readable archive-card override */
 .audio-controls{
   display:flex;
