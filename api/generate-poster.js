@@ -47,9 +47,11 @@ Plot: ${film.summary}
 Visual family: ${className}. Direction: ${classDirection[film.posterClass]||classDirection.youth}.
 This generation must use: ${composition}. Poster method: ${style}.
 Show a rich, believable real-life cinematic environment with foreground, midground and background; detailed everyday architecture or landscape; atmospheric lighting; tactile materials; environmental storytelling through ordinary objects; premium hand-painted anime-film illustration quality; emotionally memorable and suitable for a widely shared collectible movie poster.
+This must be a full scene illustration, not a symbol poster. Include visible spatial depth, surfaces, furniture or architecture, light and shadow, foreground objects with volume, background details, and a clear cinematic camera angle. The image should feel like a finished anime movie key visual or an illustrated film still.
 No characters, people, portraits, faces, bodies, silhouettes or human reflections. Tell the story through the location and meaningful objects only.
 Do not use science-fiction, futuristic, cyberpunk, fantasy, cosmic, magical, holographic, system-like or technology-driven visuals unless explicitly present in the plot.
-Make this image fundamentally different from previous variants: use a new scene moment, camera angle, lens feeling, time of day, light source, object arrangement and color balance. Avoid abstract geometry, circles, frames, wire diagrams, icon-like shapes, flat gradients, UI graphics and empty vector design. The output must look like an actual illustrated movie scene, not a layout mockup. No typography, letters, logos or watermark.`;
+Make this image fundamentally different from previous variants: use a new scene moment, camera angle, lens feeling, time of day, light source, object arrangement and color balance.
+Strictly avoid abstract geometry, simple line icons, outline-only objects, circles, frames, wire diagrams, flat gradients, UI graphics, empty vector design, minimal logo-like marks, decorative line art, and plain pattern backgrounds. The output must look like an actual illustrated movie scene with real visual content, not a layout mockup. No typography, letters, logos or watermark.`;
   try{
     const endpoint=provider==='ark'
       ?`${process.env.ARK_BASE_URL||'https://ark.cn-beijing.volces.com/api/v3'}/images/generations`
