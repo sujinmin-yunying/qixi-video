@@ -30,6 +30,18 @@ async function toDataUrl(url){
   return `data:${contentType};base64,${base64}`;
 }
 
+function normalizeArkSize(rawSize){
+  const requested=String(rawSize||'').trim();
+  const supported=new Set(['1024x1024','720x1280','1280x720','864x1152','1152x864','768x1024','1024x768']);
+  if(supported.has(requested))return{size:requested,requested,changed:false};
+  if(/^\d{3,5}x\d{3,5}$/i.test(requested)){
+    const [w,h]=requested.toLowerCase().split('x').map(Number);
+    if(h>w)return{size:'720x1280',requested,changed:true};
+    if(w>h)return{size:'1280x720',requested,changed:true};
+  }
+  return{size:'720x1280',requested:requested||'(empty)',changed:!!requested};
+}
+
 export default async function handler(req,res){
   if(req.method!=='POST')return res.status(405).json({error:'Method not allowed'});
   const provider=(process.env.IMAGE_PROVIDER||'').toLowerCase()||((process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY)?'ark':'openai');
@@ -58,9 +70,11 @@ Strictly avoid abstract geometry, simple line icons, outline-only objects, circl
       ?`${process.env.ARK_BASE_URL||'https://ark.cn-beijing.volces.com/api/v3'}/images/generations`
       :'https://api.openai.com/v1/images/generations';
     let arkModel=process.env.ARK_IMAGE_MODEL||process.env.VOLCENGINE_IMAGE_MODEL||'doubao-seedream-3-0-t2i-250415';
-    let arkSize=process.env.ARK_IMAGE_SIZE||'1536x2560';
+    let arkSizeInfo=normalizeArkSize(process.env.ARK_IMAGE_SIZE||'720x1280');
+    let arkSize=arkSizeInfo.size;
     if(/^\d{3,5}x\d{3,5}$/i.test(arkModel)){
-      arkSize=arkModel;
+      arkSizeInfo=normalizeArkSize(arkModel);
+      arkSize=arkSizeInfo.size;
       arkModel='doubao-seedream-3-0-t2i-250415';
     }
     const body=provider==='ark'
@@ -72,7 +86,7 @@ Strictly avoid abstract geometry, simple line icons, outline-only objects, circl
         n:1
       }
       :{model:'gpt-image-2',prompt,size:'1024x1536',quality:'medium',n:1};
-    const meta={provider,model:provider==='ark'?arkModel:'gpt-image-2',size:provider==='ark'?arkSize:'1024x1536',endpoint:provider==='ark'?'ark images/generations':'openai images/generations'};
+    const meta={provider,model:provider==='ark'?arkModel:'gpt-image-2',size:provider==='ark'?arkSize:'1024x1536',requestedSize:provider==='ark'?arkSizeInfo.requested:'1024x1536',sizeChanged:provider==='ark'?arkSizeInfo.changed:false,endpoint:provider==='ark'?'ark images/generations':'openai images/generations'};
     const response=await fetch(endpoint,{method:'POST',headers:{Authorization:`Bearer ${provider==='ark'?arkKey:openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await response.json();
     if(!response.ok){
