@@ -35,8 +35,9 @@ export default async function handler(req,res){
   const provider=(process.env.IMAGE_PROVIDER||'').toLowerCase()||((process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY)?'ark':'openai');
   const arkKey=process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY;
   const openaiKey=process.env.OPENAI_API_KEY;
-  if(provider==='ark'&&!arkKey)return res.status(503).json({error:'ARK_API_KEY is not configured'});
-  if(provider!=='ark'&&!openaiKey)return res.status(503).json({error:'OPENAI_API_KEY is not configured'});
+  const debugMeta={provider,hasArkKey:!!arkKey,hasOpenAIKey:!!openaiKey};
+  if(provider==='ark'&&!arkKey)return res.status(503).json({error:'ARK_API_KEY is not configured',meta:debugMeta});
+  if(provider!=='ark'&&!openaiKey)return res.status(503).json({error:'OPENAI_API_KEY is not configured',meta:debugMeta});
   const {film,variant=0,style='场景电影',className='电影'}=req.body||{};
   if(!film?.title)return res.status(400).json({error:'Missing film data'});
   const composition=compositions[variant%compositions.length];
@@ -71,6 +72,7 @@ Strictly avoid abstract geometry, simple line icons, outline-only objects, circl
         n:1
       }
       :{model:'gpt-image-2',prompt,size:'1024x1536',quality:'medium',n:1};
+    const meta={provider,model:provider==='ark'?arkModel:'gpt-image-2',size:provider==='ark'?arkSize:'1024x1536',endpoint:provider==='ark'?'ark images/generations':'openai images/generations'};
     const response=await fetch(endpoint,{method:'POST',headers:{Authorization:`Bearer ${provider==='ark'?arkKey:openaiKey}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await response.json();
     if(!response.ok){
@@ -78,11 +80,11 @@ Strictly avoid abstract geometry, simple line icons, outline-only objects, circl
       if(/1536x2560|1024x1024|1024x1536|size/i.test(detail)&&/model|endpoint|not.?found/i.test(detail)){
         throw new Error('火山配置填错：你可能把图片尺寸填到了 ARK_IMAGE_MODEL。请设置 ARK_IMAGE_MODEL 为图像模型/接入点ID，把 1536x2560 填到 ARK_IMAGE_SIZE。');
       }
-      throw new Error(detail||`${provider==='ark'?'Volcengine Ark':'OpenAI'} image request failed with status ${response.status}`);
+      throw new Error(`${detail||`${provider==='ark'?'Volcengine Ark':'OpenAI'} image request failed with status ${response.status}`} · provider=${meta.provider} · model=${meta.model} · size=${meta.size}`);
     }
     const item=data.data?.[0];
     const image=item?.b64_json?`data:image/png;base64,${item.b64_json}`:await toDataUrl(item?.url);
     if(!image)throw new Error('No image returned');
-    return res.status(200).json({image});
-  }catch(error){return res.status(500).json({error:error.message||'Poster generation failed'})}
+    return res.status(200).json({image,meta});
+  }catch(error){return res.status(500).json({error:error.message||'Poster generation failed',meta:debugMeta})}
 }
