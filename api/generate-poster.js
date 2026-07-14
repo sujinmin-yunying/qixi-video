@@ -18,6 +18,18 @@ const classDirection={
   scifi:'realistic urban relationship film, convenience store, apartment corridor, subway entrance or office pantry, warm practical lighting and everyday props'
 };
 
+export const config={maxDuration:60};
+
+async function toDataUrl(url){
+  if(!url||String(url).startsWith('data:'))return url;
+  const response=await fetch(url);
+  if(!response.ok)throw new Error(`Poster image download failed with status ${response.status}`);
+  const contentType=response.headers.get('content-type')||'image/png';
+  const arrayBuffer=await response.arrayBuffer();
+  const base64=Buffer.from(arrayBuffer).toString('base64');
+  return `data:${contentType};base64,${base64}`;
+}
+
 export default async function handler(req,res){
   if(req.method!=='POST')return res.status(405).json({error:'Method not allowed'});
   const provider=(process.env.IMAGE_PROVIDER||'').toLowerCase()||((process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY)?'ark':'openai');
@@ -42,11 +54,17 @@ Make this image fundamentally different from previous variants: use a new scene 
     const endpoint=provider==='ark'
       ?`${process.env.ARK_BASE_URL||'https://ark.cn-beijing.volces.com/api/v3'}/images/generations`
       :'https://api.openai.com/v1/images/generations';
+    let arkModel=process.env.ARK_IMAGE_MODEL||process.env.VOLCENGINE_IMAGE_MODEL||'doubao-seedream-3-0-t2i-250415';
+    let arkSize=process.env.ARK_IMAGE_SIZE||'1536x2560';
+    if(/^\d{3,5}x\d{3,5}$/i.test(arkModel)){
+      arkSize=arkModel;
+      arkModel='doubao-seedream-3-0-t2i-250415';
+    }
     const body=provider==='ark'
       ?{
-        model:process.env.ARK_IMAGE_MODEL||process.env.VOLCENGINE_IMAGE_MODEL||'doubao-seedream-3-0-t2i-250415',
+        model:arkModel,
         prompt,
-        size:process.env.ARK_IMAGE_SIZE||'1536x2560',
+        size:arkSize,
         response_format:process.env.ARK_RESPONSE_FORMAT||'url',
         n:1
       }
@@ -55,10 +73,13 @@ Make this image fundamentally different from previous variants: use a new scene 
     const data=await response.json();
     if(!response.ok){
       const detail=[data.error?.type,data.error?.code,data.error?.message,data.message,data.msg].filter(Boolean).join(' · ');
+      if(/1536x2560|1024x1024|1024x1536|size/i.test(detail)&&/model|endpoint|not.?found/i.test(detail)){
+        throw new Error('火山配置填错：你可能把图片尺寸填到了 ARK_IMAGE_MODEL。请设置 ARK_IMAGE_MODEL 为图像模型/接入点ID，把 1536x2560 填到 ARK_IMAGE_SIZE。');
+      }
       throw new Error(detail||`${provider==='ark'?'Volcengine Ark':'OpenAI'} image request failed with status ${response.status}`);
     }
     const item=data.data?.[0];
-    const image=item?.b64_json?`data:image/png;base64,${item.b64_json}`:item?.url;
+    const image=item?.b64_json?`data:image/png;base64,${item.b64_json}`:await toDataUrl(item?.url);
     if(!image)throw new Error('No image returned');
     return res.status(200).json({image});
   }catch(error){return res.status(500).json({error:error.message||'Poster generation failed'})}
