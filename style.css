@@ -46,6 +46,28 @@
   --safe-x:clamp(24px,6vw,88px);
   --grid-8:8px;
 }
+
+/* 2026-07-13 chat import recognition feedback */
+.import-detail{
+  margin:12px 0 14px;
+  padding:12px 14px;
+  border:1px solid #3f372e;
+  background:#ffffff08;
+  color:#cfc5b7;
+  border-radius:14px;
+  font:400 12px/1.65 "Noto Serif SC",serif;
+  white-space:pre-wrap;
+}
+.import-detail.ok{
+  border-color:#c4a46b88;
+  background:#c4a46b12;
+  color:#f2eadb;
+}
+.import-detail.warn{
+  border-color:#8f6045aa;
+  background:#6d392414;
+  color:#e4c5ae;
+}
 body{font-size:15px;line-height:1.7;background:var(--ui-bg);color:var(--ui-ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .kicker,.archive-card header small,.detail-mark,.poster-meter,.scene-note,.caption{font-family:Outfit,"Noto Serif SC",serif;font-size:11px!important;line-height:1.45!important;letter-spacing:.18em!important;font-weight:500!important;color:var(--ui-accent)!important;text-transform:uppercase}
 .page h1,.page .movie-title,.intro h1,.story-head h1{font-family:"Noto Serif SC",serif;font-weight:700;letter-spacing:-.045em}
