@@ -587,6 +587,14 @@ body{font-size:15px;line-height:1.7;background:var(--ui-bg);color:var(--ui-ink);
   border-top:1px dashed #c8bba8;
   padding-top:7px;
   text-align:center;
+  display:grid;
+  gap:4px;
+}
+.ticket-note span{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 .ticket-actions{
   display:flex;
