@@ -202,9 +202,9 @@ function buildFilm(){let chat=analyzeChat(getChatInput()),selected=$('.types .se
  actorNotes=actorNotes.map(v=>safeTrailerText(safeMovieText(v)));
  quotes=quotes.map(v=>safeTrailerText(safeMovieText(v)));
  ending=safeTrailerText(safeMovieText(ending));
- title=personLockText(title);summary=personLockText(summary);long=personLockText(long);words=words.map(w=>personLockText(w)).filter(w=>!/(用户|聊天记录|上传文本|主角|他们|两个人)/.test(w));trailerLines=trailerLines.map(x=>personLockText(x));
  let hook=chat.hasChat?(chat.core?.slogan||flavor.hooks.find(Boolean)||'普通一天，也值得放映。'):pick(flavor.hooks);
  let trailerLines=makeTrailerLines({title,flavor,location,object,deadline,chat,core});
+ title=personLockText(title);summary=personLockText(summary);long=personLockText(long);words=words.map(w=>personLockText(w)).filter(w=>!/(用户|聊天记录|上传文本|主角|他们|两个人)/.test(w));trailerLines=trailerLines.map(x=>personLockText(x));
  let slogan=safeMovieText(hook),posterClass=posterClassFor(type,scene);
  return{...base,title,titleCandidates:newTitle.lastCandidates||[],type,era,tone,storyFlavor:flavor.name,location,object,relation,deadline,posterClass,genre:`${type} · ${flavor.name}`,slogan,summary,logline:summary,long,words,quotes,acts,behind,actorNotes,ending,trailerLines,scene,chatUsed:chat.hasChat,chatLineCount:chat.lineCount||0,chatHints:chat.debug||'',archiveId:'FILM-'+Date.now().toString(36).toUpperCase()}}
 function show(id){$$('.page').forEach(x=>x.classList.remove('active'));$('#'+id).classList.add('active');scrollTo(0,0);sfx('page')}
