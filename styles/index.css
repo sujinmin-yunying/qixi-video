@@ -1,0 +1,19 @@
+/**
+ * [INPUT]: 依赖 core、features、fixes 三层样式模块的固定级联顺序
+ * [OUTPUT]: 对外提供活动页面唯一主样式入口
+ * [POS]: styles 的装配入口，被 index.html 直接加载
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+@import url("./core/base.css");
+@import url("./core/editorial.css");
+@import url("./core/opening.css");
+@import url("./features/archive.css");
+@import url("./features/premiere.css");
+@import url("./features/effects.css");
+@import url("./features/cards.css");
+@import url("./features/onboarding.css");
+@import url("./features/grid.css");
+@import url("./fixes/readability.css");
+@import url("./fixes/premiere.css");
+@import url("./fixes/poster.css");

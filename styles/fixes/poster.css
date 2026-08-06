@@ -1,0 +1,47 @@
+/**
+ * [INPUT]: 依赖海报舞台 DOM、生成态 class 与运行环境徽标
+ * [OUTPUT]: 对外提供海报图层可读性修正和环境状态徽标
+ * [POS]: styles/fixes 的海报最终覆盖层
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+.poster-stage:before {
+  display: none !important;
+}
+.mini-poster {
+  box-shadow: 0 25px 80px #000 !important;
+}
+.poster-overlay {
+  background: linear-gradient(
+    180deg,
+    #050505bd 0%,
+    transparent 30%,
+    transparent 68%,
+    #050505e8 100%
+  ) !important;
+  border: 0 !important;
+}
+.poster-overlay .genre {
+  color: #ddd !important;
+}
+.poster-overlay .poster-credit {
+  border-top-color: #ffffff66 !important;
+}
+.poster-credit small {
+  color: #bbb !important;
+}
+.runtime-badge {
+  position: fixed;
+  z-index: 30;
+  right: 12px;
+  bottom: 12px;
+  padding: 7px 10px;
+  border: 1px solid #ffffff2e;
+  background: #0b0b0bde;
+  color: #c8b88e;
+  font:
+    600 10px/1 Outfit,
+    sans-serif;
+  letter-spacing: 0.14em;
+  backdrop-filter: blur(12px);
+}

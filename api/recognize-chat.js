@@ -1,3 +1,12 @@
+/**
+ * [INPUT]: 依赖 ./_runtime.js 的远程环境守卫及服务端视觉模型配置
+ * [OUTPUT]: 对外提供 POST /api/recognize-chat Vercel handler
+ * [POS]: api 的聊天截图 OCR 入口，test/prod 失败时禁止降级到 mock
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+import {assertRemoteEnv} from './_runtime.js';
+
 export const config={maxDuration:60};
 
 function json(res,status,payload){
@@ -68,6 +77,7 @@ function cleanText(text=''){
 
 export default async function handler(req,res){
   if(req.method!=='POST')return json(res,405,{error:'Method not allowed'});
+  try{assertRemoteEnv()}catch(error){return json(res,error.status||500,{error:error.message})}
   const image=normalizeDataUrl(req.body?.image);
   if(!image)return json(res,400,{error:'Missing image'});
 

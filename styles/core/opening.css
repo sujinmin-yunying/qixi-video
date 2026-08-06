@@ -1,0 +1,665 @@
+/**
+ * [INPUT]: 依赖 styles/index.css 的固定加载顺序与 index.html 对应 DOM
+ * [OUTPUT]: 对外提供电影式开场、导入面板和海报生成交互
+ * [POS]: styles/core 的核心视觉的开场体验层
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+/* Cinematic opening — not a form panel */
+.landing {
+  display: none;
+  position: relative;
+  align-content: center;
+  align-items: center;
+  padding: 110px 7vw 70px;
+  background:
+    linear-gradient(90deg, #080808fa 0%, #080808e8 52%, #08080842),
+    url("/assets/cinema-abstract.png") 62% center/cover;
+}
+.landing.active {
+  display: flex;
+}
+.landing:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(0deg, #090909 0%, transparent 28%),
+    radial-gradient(circle at 62% 50%, transparent, #07070755 70%);
+}
+.landing nav,
+.landing-copy,
+.import-drawer {
+  z-index: 2;
+}
+.landing nav > div,
+.hub nav > div {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.sound-toggle,
+.import-open {
+  border: 0;
+  background: transparent;
+  color: #bab3aa;
+  font: 11px Outfit;
+  letter-spacing: 0.12em;
+}
+.landing-copy {
+  width: min(720px, 62vw);
+}
+.landing-copy h1 {
+  font-size: clamp(60px, 7.5vw, 116px);
+  letter-spacing: -0.06em;
+  margin: 16px 0 18px;
+}
+.landing-copy h2 {
+  color: #c9c2b8;
+  font-size: 17px;
+}
+.prologue {
+  margin: 34px 0 42px;
+}
+.quick-fields {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  width: min(600px, 100%);
+  border-top: 1px solid #413d37;
+  padding-top: 24px;
+}
+.quick-fields label {
+  flex: 1;
+  margin: 0;
+}
+.quick-fields label > span {
+  display: block;
+  font: 10px Outfit;
+  letter-spacing: 0.16em;
+  color: #77716a;
+}
+.quick-fields input {
+  border: 0;
+  border-bottom: 1px solid #4d4841;
+  background: transparent;
+  padding: 12px 0 10px;
+  font: 500 21px "Noto Serif SC";
+  margin: 0;
+}
+.quick-fields input:focus {
+  border-color: #d5c49f;
+}
+.cross {
+  color: #766d62;
+  padding-bottom: 10px;
+}
+.landing .types {
+  margin: 20px 0 28px;
+}
+.landing .types button {
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 7px 0;
+  margin-right: 16px;
+}
+.landing .types button.selected {
+  border-color: var(--gold);
+}
+.landing-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.landing-actions .primary {
+  min-width: 220px;
+  display: flex;
+  justify-content: space-between;
+}
+.import-status {
+  font-size: 10px;
+  color: #6f6a63;
+  letter-spacing: 0.08em;
+}
+.import-drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: min(460px, 92vw);
+  background: #111;
+  padding: 10vh 45px;
+  transform: translateX(102%);
+  transition: 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: -30px 0 90px #0009;
+}
+.import-drawer.open {
+  transform: none;
+}
+.drawer-close {
+  position: absolute;
+  right: 28px;
+  top: 24px;
+  border: 0;
+  background: none;
+  color: #eee;
+  font-size: 28px;
+}
+.import-drawer h3 {
+  font: 500 34px/1.45 "Noto Serif SC";
+}
+.import-drawer textarea {
+  min-height: 150px;
+}
+.import-confirm {
+  width: 100%;
+  margin-top: 15px;
+}
+.drop {
+  background: #171717;
+}
+.poster-stage {
+  width: min(42vw, 610px);
+}
+.mini-poster {
+  width: 100%;
+  position: relative;
+  background: #111;
+  border: 1px solid #302c27;
+  overflow: hidden;
+}
+.poster-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition:
+    opacity 0.8s,
+    transform 1.2s;
+}
+.mini-poster.generated .poster-image {
+  opacity: 1;
+}
+.mini-poster.generated:hover .poster-image {
+  transform: scale(1.018);
+}
+.poster-overlay {
+  position: absolute;
+  inset: 0;
+  padding: 9%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background: linear-gradient(0deg, #050505e8 0%, transparent 52%);
+  opacity: 0;
+  transition: 0.6s;
+}
+.generated .poster-overlay {
+  opacity: 1;
+}
+.poster-overlay .movie-title {
+  font-size: clamp(39px, 4vw, 62px);
+  text-align: left;
+}
+.poster-credit {
+  margin-top: 25px;
+  letter-spacing: 0.14em;
+  color: #d0c7ba;
+}
+.poster-generate {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: radial-gradient(circle at 50% 45%, #42251e, #111 48%, #090909);
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.poster-generate span {
+  font-size: 36px;
+  color: var(--gold);
+}
+.poster-generate b {
+  font: 500 20px "Noto Serif SC";
+}
+.poster-generate small {
+  color: #817a70;
+}
+.generated .poster-generate {
+  inset: auto 22px 22px auto;
+  padding: 13px 17px;
+  background: #f0ece4;
+  color: #17130e;
+  display: block;
+  z-index: 3;
+}
+.generated .poster-generate span {
+  display: none;
+}
+.generated .poster-generate b {
+  font: 500 12px Outfit;
+}
+.generated .poster-generate small {
+  display: none;
+}
+.poster-meter {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #302c27;
+  padding: 14px 2px;
+  color: #6f6a62;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+}
+.poster-meter b {
+  color: #bbb;
+  font-weight: 400;
+}
+@media (max-width: 760px) {
+  .landing {
+    padding: 92px 6vw 45px;
+    align-content: flex-start;
+    align-items: flex-start;
+    background-position: center;
+  }
+  .landing-copy {
+    width: 100%;
+  }
+  .landing-copy h1 {
+    font-size: 53px;
+  }
+  .landing nav > div span {
+    display: none;
+  }
+  .prologue {
+    font-size: 13px;
+  }
+  .quick-fields {
+    gap: 11px;
+  }
+  .quick-fields input {
+    font-size: 17px;
+  }
+  .landing-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .landing-actions .primary {
+    width: 100%;
+  }
+  .landing .types {
+    white-space: nowrap;
+    overflow-x: auto;
+    display: block;
+    padding-bottom: 8px;
+  }
+  .hub.active {
+    display: flex;
+  }
+  .poster-stage {
+    width: 100%;
+  }
+  .mini-poster {
+    height: 68vh;
+    min-height: 530px;
+  }
+  .poster-overlay .movie-title {
+    font-size: 42px;
+  }
+  .import-drawer {
+    padding: 11vh 28px;
+  }
+  .sound-toggle {
+    padding: 8px;
+  }
+}
+
+/* Black & white film edition */
+:root {
+  --bg: #070707;
+  --panel: #0d0d0d;
+  --line: #2b2b2b;
+  --paper: #f2f0e9;
+  --muted: #8b8b87;
+  --gold: #d6d2c9;
+}
+body {
+  background: #070707;
+  color: #f2f0e9;
+}
+.kicker {
+  color: #aaa;
+  letter-spacing: 0.26em;
+}
+.landing {
+  background:
+    linear-gradient(90deg, #070707 0%, #070707f0 48%, #07070775),
+    url("/assets/cinema-abstract.png") 68% center/cover;
+  filter: none;
+}
+.landing:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #0000, #0003),
+    repeating-linear-gradient(90deg, #fff0 0 2px, #fff008 3px 4px);
+  opacity: 0.32;
+  pointer-events: none;
+}
+.landing-copy {
+  width: min(1040px, 82vw);
+}
+.landing-copy h1 {
+  font-size: clamp(54px, 7.3vw, 112px);
+  white-space: nowrap;
+  letter-spacing: -0.07em;
+}
+.landing-copy h2 {
+  font-size: 19px;
+  letter-spacing: 0.08em;
+}
+.prologue {
+  max-width: 650px;
+}
+.primary {
+  background: #f2f0e9;
+  color: #090909;
+  border-color: #f2f0e9;
+}
+.setup,
+.import-drawer {
+  background: #0b0b0b;
+}
+.types button.selected {
+  border-color: #ddd;
+  color: #fff;
+}
+.quick-fields input {
+  color: #fff;
+}
+.hub,
+.inner {
+  font-family: Outfit, "Noto Serif SC", serif;
+}
+.hub {
+  gap: 9vw;
+}
+.poster-overlay {
+  background: linear-gradient(
+    0deg,
+    #050505f5 0%,
+    #05050590 27%,
+    transparent 62%
+  );
+}
+.story-head {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 65vh;
+  gap: 28px;
+}
+.story-head > div {
+  width: 100%;
+}
+.story-head h1 {
+  font-size: clamp(64px, 8vw, 124px);
+  text-align: center;
+  line-height: 1.08;
+  letter-spacing: -0.07em;
+  white-space: normal;
+}
+.story-head > p {
+  max-width: 760px;
+  font-size: 18px;
+  text-align: center;
+}
+.synopsis-block {
+  grid-template-columns: 80px minmax(0, 900px);
+  justify-content: center;
+  padding: 95px 0;
+}
+.long-summary {
+  text-align: center;
+}
+.synopsis-block .kicker {
+  text-align: center;
+}
+.acts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+}
+.acts article {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 55px 34px;
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.acts article:last-child {
+  border-right: 0;
+}
+.acts article:before {
+  font-size: 48px;
+  color: #252525;
+}
+.acts h3 {
+  font-size: 26px;
+  min-height: 78px;
+}
+.acts p {
+  font-size: 15px;
+}
+.quote-heading {
+  text-align: center;
+}
+.quotes {
+  max-width: 1100px;
+  margin: auto;
+}
+.behind article {
+  grid-template-columns: 80px minmax(220px, 330px) minmax(0, 680px);
+  justify-content: center;
+}
+.finale {
+  background: linear-gradient(180deg, #090909, #111);
+  border: 1px solid var(--line);
+}
+.trailer {
+  font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+  background: #020202;
+}
+.trailer:after {
+  background: radial-gradient(
+    circle at center,
+    #0000 0 12%,
+    #000b 67%,
+    #000 100%
+  );
+}
+.vortex {
+  border: 0;
+  box-shadow: 0 0 160px #fff1;
+  background: radial-gradient(circle, #eee1 0%, #fff0 62%);
+  animation: breath 4s ease-in-out infinite;
+}
+.trailer-line {
+  font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.65s ease,
+    transform 0.65s ease;
+}
+.trailer-line.visible {
+  opacity: 1;
+  transform: none;
+}
+.wordstorm i {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  color: #eee;
+  opacity: 0;
+  animation: keyword 3.4s ease-out forwards;
+  text-shadow: 0 0 20px #fff8;
+}
+.wordstorm:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  height: 1px;
+  box-shadow: 0 0 120px 55px #fff2;
+  border-radius: 50%;
+}
+@keyframes breath {
+  50% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+}
+@keyframes keyword {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  24% {
+    opacity: 0.75;
+  }
+  72% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    left: 50%;
+    top: 50%;
+    transform: scale(0.16);
+  }
+}
+@media (max-width: 760px) {
+  .landing-copy h1 {
+    white-space: normal;
+    font-size: 51px;
+    line-height: 1.12;
+  }
+  .story-head {
+    min-height: 72vh;
+  }
+  .story-head h1 {
+    font-size: 54px;
+  }
+  .synopsis-block {
+    grid-template-columns: 1fr;
+    padding: 65px 0;
+  }
+  .synopsis-block > span {
+    display: none;
+  }
+  .acts {
+    grid-template-columns: 1fr;
+  }
+  .acts article {
+    border-right: 0;
+    padding: 50px 4px;
+  }
+  .acts h3 {
+    min-height: 0;
+  }
+  .behind article {
+    grid-template-columns: 1fr;
+  }
+  .trailer-line {
+    font-size: 32px;
+    max-width: 86%;
+    line-height: 1.7;
+  }
+  .wordstorm i {
+    font-size: 14px !important;
+  }
+}
+.poster-generate.generating {
+  inset: 0 !important;
+  background: #090909 !important;
+  color: #eee !important;
+  display: flex !important;
+}
+.poster-generate.generating:before {
+  content: "";
+  width: 42px;
+  height: 42px;
+  border: 1px solid #555;
+  border-top-color: #eee;
+  border-radius: 50%;
+  animation: poster-spin 1s linear infinite;
+}
+.poster-generate.generating span,
+.poster-generate.generating small {
+  display: none !important;
+}
+@keyframes poster-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.landing:before {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.52'/%3E%3C/svg%3E") !important;
+  background-color: transparent !important;
+  mix-blend-mode: soft-light;
+  opacity: 0.16 !important;
+}
+.landing-copy {
+  text-shadow: 0 2px 18px #000;
+}
+.landing-copy h2 {
+  color: #f0ede6;
+}
+.prologue {
+  color: #d6d2cb;
+}
+.quick-fields label > span,
+.import-status {
+  color: #aaa;
+}
+.landing .types button {
+  color: #aaa;
+}
+.poster-overlay .movie-title {
+  width: 100%;
+  max-width: none;
+  text-align: left !important;
+  white-space: nowrap;
+  font-size: clamp(32px, 3.25vw, 52px) !important;
+  letter-spacing: -0.06em;
+  line-height: 1.12;
+}
+.poster-overlay {
+  align-items: flex-start !important;
+}
+.poster-overlay .genre,
+.poster-overlay .slogan,
+.poster-overlay .poster-credit {
+  text-align: left;
+  width: 100%;
+}
+@media (max-width: 760px) {
+  .poster-overlay .movie-title {
+    font-size: 34px !important;
+    white-space: nowrap;
+  }
+}

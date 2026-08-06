@@ -10,7 +10,7 @@
       ]
     },
     {
-      "source": "/app.js",
+      "source": "/src/app.js",
       "headers": [
         {
           "key": "Cache-Control",
@@ -19,16 +19,7 @@
       ]
     },
     {
-      "source": "/style.css",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/poster-overrides.css",
+      "source": "/styles/(.*).css",
       "headers": [
         {
           "key": "Cache-Control",
