@@ -598,29 +598,30 @@
   .cinema-ticket {
     width: min(88vw, 640px) !important;
     min-height: 212px !important;
-    grid-template-columns: 58px minmax(0, 1fr) 82px !important;
-    gap: 10px !important;
-    padding: 14px 12px !important;
+    grid-template-columns: 54px minmax(0, 1fr) 74px !important;
+    gap: 8px !important;
+    padding: 14px 10px !important;
   }
   .cinema-ticket:nth-child(2) {
     top: 232px !important;
+    transform: translateX(-50%) !important;
   }
   .ticket-thumb {
-    width: 56px !important;
-    height: 84px !important;
+    width: 52px !important;
+    height: 78px !important;
   }
   .ticket-info h3 {
     font-size: 17px !important;
     margin-bottom: 8px !important;
   }
   .ticket-info dl {
-    grid-template-columns: 44px minmax(0, 1fr) 38px minmax(0, 1fr) !important;
-    grid-auto-rows: 16px !important;
-    gap: 3px 6px !important;
+    grid-template-columns: 40px minmax(0, 1fr) !important;
+    grid-auto-rows: 13px !important;
+    gap: 2px 5px !important;
     font-size: 8px !important;
   }
   .ticket-order {
-    grid-template-columns: 58px minmax(0, 1fr) !important;
+    grid-template-columns: 54px minmax(0, 1fr) !important;
     gap: 6px !important;
     margin-top: 8px !important;
     padding-top: 6px !important;
@@ -639,12 +640,12 @@
   }
   .ticket-code {
     grid-column: auto !important;
-    min-width: 82px !important;
-    padding-left: 8px !important;
+    min-width: 74px !important;
+    padding-left: 6px !important;
     gap: 7px !important;
   }
   .ticket-barcode {
-    width: 68px !important;
+    width: 64px !important;
     height: 26px !important;
   }
   .ticket-qr {
@@ -719,7 +720,7 @@
 }
 @media (max-width: 760px) {
   .ticket-barcode {
-    width: 74px !important;
+    width: 64px !important;
     height: 28px !important;
   }
   .ticket-qr {

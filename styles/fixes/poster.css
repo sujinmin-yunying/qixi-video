@@ -45,3 +45,14 @@
   letter-spacing: 0.14em;
   backdrop-filter: blur(12px);
 }
+@media (max-width: 760px) {
+  .runtime-badge {
+    position: absolute;
+    top: 58px;
+    right: 8px;
+    bottom: auto;
+    font-size: 8px;
+    opacity: 0.76;
+    pointer-events: none;
+  }
+}

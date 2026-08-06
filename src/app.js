@@ -1,6 +1,6 @@
 /**
  * [INPUT]: 依赖 index.html 的活动 DOM、window.__QIXI_RUNTIME__、浏览器 Canvas/File/Bridge 能力
- * [OUTPUT]: 对外提供活动交互、故事生成、local mock、App 角色与聊天 Bridge 接收函数
+ * [OUTPUT]: 对外提供活动交互、故事生成、响应式电影票及标准尺寸导出、local mock、App 角色与聊天 Bridge 接收函数
  * [POS]: src 的前端核心控制器；local 完全前端模拟，test/prod 只经服务端 /api 使用模型
  * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
  */
@@ -468,7 +468,16 @@ function downloadCanvas(canvas,name){let a=document.createElement('a');a.downloa
 function downloadDataUrl(dataUrl,name){let a=document.createElement('a');a.download=(name||'movie-card').replace(/[\\/:*?"<>|]/g,'-')+'.png';a.href=dataUrl;a.style.display='none';document.body.appendChild(a);a.click();requestAnimationFrame(()=>a.remove())}
 function nextFrame(){return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}
 async function waitForImagesLoaded(node,timeout=5000){let imgs=[...node.querySelectorAll('img')],start=Date.now();await Promise.all(imgs.map(img=>new Promise(resolve=>{if(img.complete&&img.naturalWidth>0)return resolve();let done=()=>resolve();img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});let tick=()=>Date.now()-start>timeout?resolve():setTimeout(tick,80);tick()})))}
-function validateTicketPreview(node){let rect=node.getBoundingClientRect(),tickets=[...node.querySelectorAll('.cinema-ticket')],imgs=[...node.querySelectorAll('.ticket-thumb img')],qrs=[...node.querySelectorAll('.ticket-qr-svg')],bars=[...node.querySelectorAll('.ticket-barcode-svg')];if(!node||rect.width<300||rect.height<180)throw new Error('电影票预览区域还没有准备好');if(tickets.length!==2)throw new Error('没有找到两张电影票预览');if(imgs.length!==2||imgs.some(img=>!img.complete||img.naturalWidth<1))throw new Error('电影海报缩略图还没有加载完成');if(qrs.length!==2)throw new Error('二维码还没有渲染完成');if(bars.length!==2)throw new Error('条形码还没有渲染完成');qrs.forEach(q=>{let r=q.getBoundingClientRect();if(Math.abs(r.width-r.height)>1||r.width<40)throw new Error('二维码尺寸异常')});bars.forEach(b=>{let r=b.getBoundingClientRect();if(r.width<80||r.height<20)throw new Error('条形码尺寸异常')});return rect}
+const TICKET_EXPORT=Object.freeze({width:660,height:488,ticketWidth:640,ticketHeight:228,ticketTop:[0,248]});
+function validateTicketPreview(node){
+ if(!node)throw new Error('没有找到电影票预览');
+ const rect=node.getBoundingClientRect(),tickets=[...node.querySelectorAll('.cinema-ticket')],imgs=[...node.querySelectorAll('.ticket-thumb img')],qrs=[...node.querySelectorAll('.ticket-qr-svg')],bars=[...node.querySelectorAll('.ticket-barcode-svg')];
+ if(rect.width<280||rect.height<180)throw new Error('电影票预览区域还没有准备好');
+ if(tickets.length!==2)throw new Error('没有找到两张电影票预览');
+ if(imgs.length!==2||imgs.some(img=>!img.complete||img.naturalWidth<1))throw new Error('电影海报缩略图还没有加载完成');
+ if(qrs.length!==2||qrs.some(q=>{let r=q.getBoundingClientRect();return Math.abs(r.width-r.height)>1||r.width<40}))throw new Error('二维码还没有正确渲染');
+ if(bars.length!==2||bars.some(b=>{let r=b.getBoundingClientRect();return r.width<48||r.height<18}))throw new Error('条形码还没有正确渲染');
+}
 function ticketExportCss(w,h){return `
 *{box-sizing:border-box}
 body{margin:0;background:transparent}
@@ -488,11 +497,21 @@ body{margin:0;background:transparent}
 .ticket-note{margin:10px 0 0!important;padding:0!important;border-top:0!important;text-align:left!important;display:grid!important;gap:6px!important;min-width:0!important}
 .ticket-note span{display:block!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;line-height:1.45!important}.ticket-note span:nth-child(1),.ticket-note span:nth-child(2){font-size:12px!important;color:#665a4e!important}.ticket-note span:nth-child(3){font-size:10px!important;color:#8d8174!important}
 .ticket-code{min-width:126px!important;padding-left:18px!important;border-left:1px solid #d1c2ae!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:10px!important}
-.ticket-barcode,.ticket-qr{background:none!important;padding:0!important;display:block!important;flex:0 0 auto!important;overflow:hidden!important}.ticket-barcode{width:148px!important;height:40px!important}.ticket-qr{width:72px!important;height:72px!important;border:0!important;box-shadow:0 0 0 1px #222!important;image-rendering:pixelated!important;image-rendering:crisp-edges!important}
+.ticket-barcode,.ticket-qr{background:none!important;padding:0!important;display:block!important;flex:0 0 auto!important;overflow:hidden!important}.ticket-barcode{width:104px!important;height:34px!important}.ticket-qr{width:72px!important;height:72px!important;border:0!important;box-shadow:0 0 0 1px #222!important;image-rendering:pixelated!important;image-rendering:crisp-edges!important}
 .ticket-barcode svg,.ticket-qr svg{width:100%!important;height:100%!important;display:block!important;transform:none!important;filter:none!important;image-rendering:pixelated!important;shape-rendering:crispEdges!important}
 `}
-function cloneTicketForExport(node,w,h){let rect=node.getBoundingClientRect(),clone=node.cloneNode(true);clone.removeAttribute('id');clone.style.cssText=`position:relative!important;left:0!important;top:0!important;width:${w}px!important;height:${h}px!important;transform:none!important;opacity:1!important;animation:none!important;margin:0!important;overflow:visible!important`;let srcTickets=[...node.querySelectorAll('.cinema-ticket')],clonedTickets=[...clone.querySelectorAll('.cinema-ticket')];srcTickets.forEach((src,i)=>{let r=src.getBoundingClientRect(),ct=clonedTickets[i];if(!ct)return;ct.style.left=(r.left-rect.left)+'px';ct.style.top=(r.top-rect.top)+'px';ct.style.width=r.width+'px';ct.style.height=r.height+'px';ct.style.transform='none';ct.style.minHeight='0'});return clone}
-async function exportTicketPreview(name){let node=$('#printedTickets');if(!node)throw new Error('没有找到电影票预览');if(document.fonts?.ready)await document.fonts.ready;await waitForImagesLoaded(node);await nextFrame();let rect=validateTicketPreview(node),w=Math.ceil(rect.width),h=Math.ceil(rect.height),wrapper=document.createElement('div'),style=document.createElement('style'),clone=cloneTicketForExport(node,w,h);wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');wrapper.style.cssText=`width:${w}px;height:${h}px;position:relative;background:transparent;overflow:visible`;style.textContent=ticketExportCss(w,h);wrapper.append(style,clone);let html=new XMLSerializer().serializeToString(wrapper),svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><foreignObject width="100%" height="100%">${html}</foreignObject></svg>`,url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),img=new Image(),scale=2;let loaded=new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('电影票预览导出渲染失败'))});img.src=url;await loaded;let canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=w*scale;canvas.height=h*scale;ctx.scale(scale,scale);ctx.drawImage(img,0,0,w,h);downloadDataUrl(canvas.toDataURL('image/png'),name)}
+function cloneTicketForExport(node){
+ const clone=node.cloneNode(true);clone.removeAttribute('id');clone.style.cssText=`position:relative!important;left:0!important;top:0!important;width:${TICKET_EXPORT.width}px!important;height:${TICKET_EXPORT.height}px!important;transform:none!important;opacity:1!important;animation:none!important;margin:0!important;overflow:visible!important`;
+ [...clone.querySelectorAll('.cinema-ticket')].forEach((ticket,index)=>{ticket.style.cssText=`position:absolute!important;left:10px!important;top:${TICKET_EXPORT.ticketTop[index]}px!important;width:${TICKET_EXPORT.ticketWidth}px!important;height:${TICKET_EXPORT.ticketHeight}px!important;min-height:${TICKET_EXPORT.ticketHeight}px!important;transform:none!important;animation:none!important`});
+ return clone;
+}
+async function exportTicketPreview(name){
+ const node=$('#printedTickets');if(!node)throw new Error('没有找到电影票预览');
+ if(document.fonts?.ready)await document.fonts.ready;await waitForImagesLoaded(node);await nextFrame();validateTicketPreview(node);
+ const {width,height}=TICKET_EXPORT,wrapper=document.createElement('div'),style=document.createElement('style'),clone=cloneTicketForExport(node);wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');wrapper.style.cssText=`width:${width}px;height:${height}px;position:relative;background:transparent;overflow:visible`;style.textContent=ticketExportCss(width,height);wrapper.append(style,clone);
+ const html=new XMLSerializer().serializeToString(wrapper),svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><foreignObject width="100%" height="100%">${html}</foreignObject></svg>`,url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),img=new Image(),scale=2,loaded=new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('电影票预览导出渲染失败'))});img.src=url;await loaded;
+ const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=width*scale;canvas.height=height*scale;ctx.scale(scale,scale);ctx.drawImage(img,0,0,width,height);downloadDataUrl(canvas.toDataURL('image/png'),name);
+}
 function imageFromSrc(src){return new Promise((resolve,reject)=>{let im=new Image();im.crossOrigin='anonymous';im.onload=()=>resolve(im);im.onerror=reject;im.src=src})}
 async function drawCurrentPosterCanvas(){let item=posterHistory[posterIndex];if(!item)throw new Error('还没有可保存的海报');let im=await imageFromSrc(item.src),c=document.createElement('canvas'),ctx=c.getContext('2d'),W=c.width=1200,H=c.height=1600,y=$('#you').value.trim()||'你',t=$('#them').value.trim()||'TA';ctx.fillStyle='#090808';ctx.fillRect(0,0,W,H);let scale=Math.max(W/im.width,H/im.height),iw=im.width*scale,ih=im.height*scale;ctx.drawImage(im,(W-iw)/2,(H-ih)/2,iw,ih);
  let top=ctx.createLinearGradient(0,0,0,520);top.addColorStop(0,'rgba(12,8,15,.86)');top.addColorStop(.58,'rgba(12,8,15,.42)');top.addColorStop(1,'rgba(12,8,15,0)');ctx.fillStyle=top;ctx.fillRect(0,0,W,560);
