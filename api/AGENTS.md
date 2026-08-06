@@ -2,7 +2,7 @@
 > L2 | 父级: ../AGENTS.md
 
 成员清单
-_runtime.js: 解析并校验 APP_ENV，提供服务端环境守卫
+_runtime.js: 优先解析 APP_ENV，并将 Vercel development/preview/production 映射为 local/test/prod，提供服务端环境守卫
 runtime-config.js: 向浏览器输出无密钥的运行模式配置
 _poster-core.js: 组装海报提示词并调用 OpenAI 或火山图像服务
 generate-poster.js: 同步海报生成 HTTP 入口
