@@ -1,0 +1,304 @@
+/**
+ * [INPUT]: 依赖 styles/index.css 的固定加载顺序与 index.html 对应 DOM
+ * [OUTPUT]: 对外提供编辑排版、故事页与首版海报布局
+ * [POS]: styles/core 的核心视觉的编辑化覆盖层
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+/* Refined editorial system */
+:root {
+  --bg: #0b0b0b;
+  --panel: #111;
+  --line: #2b2926;
+  --paper: #f0ece4;
+  --muted: #99938a;
+  --gold: #bda272;
+}
+body {
+  background: var(--bg);
+}
+.landing {
+  background:
+    linear-gradient(90deg, #090909f7 0%, #090909d9 48%, #0909098c),
+    url("/assets/cinema-abstract.png") center/cover;
+}
+.setup {
+  background: #0e0e0ef2;
+  border-color: #37332d;
+  box-shadow: 0 24px 80px #0008;
+}
+.primary {
+  background: #f0ece4;
+  border-color: #f0ece4;
+}
+.kicker {
+  color: var(--gold);
+}
+.hub {
+  padding-left: 7vw;
+  padding-right: 7vw;
+  gap: 8vw;
+}
+.mini-poster {
+  width: min(42vw, 610px);
+  background:
+    linear-gradient(90deg, #080808ee 0%, #0808084c),
+    url("/assets/cinema-abstract.png") center/cover;
+  border: 1px solid #262320;
+}
+.mini-poster > div {
+  inset: 0 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.mini-poster .movie-title,
+.hubcopy .movie-title {
+  text-align: left;
+  width: 100%;
+  line-height: 1.18;
+}
+.hubcopy {
+  max-width: 600px;
+}
+.navcards button {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: 24px 0;
+}
+.navcards button:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.inner {
+  max-width: 1500px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 30px 7vw 110px;
+}
+.story-head {
+  min-height: 58vh;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 10vw;
+  border-bottom: 1px solid var(--line);
+}
+.story-head h1 {
+  font-size: clamp(48px, 6vw, 84px);
+  text-align: left;
+  margin: 14px 0;
+}
+.story-head > p {
+  color: var(--muted);
+  font: 400 17px/2 "Noto Serif SC";
+  max-width: 480px;
+}
+.synopsis-block {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 30px;
+  padding: 80px 0;
+  border-bottom: 1px solid var(--line);
+}
+.synopsis-block > span {
+  font-size: 72px;
+  color: #292725;
+  line-height: 1;
+}
+.synopsis-block > div {
+  max-width: 900px;
+}
+.long-summary {
+  font: 400 clamp(20px, 2.2vw, 31px) / 1.85 "Noto Serif SC";
+  margin: 15px 0;
+  color: #ded8ce;
+}
+.acts {
+  display: block;
+}
+.acts article {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 130px minmax(200px, 360px) 1fr;
+  gap: 45px;
+  padding: 64px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+}
+.acts article:before {
+  content: attr(data-num);
+  font-size: 13px;
+  color: #676159;
+}
+.acts i {
+  padding-top: 4px;
+}
+.acts h3 {
+  margin: 0;
+  font: 500 27px/1.5 "Noto Serif SC";
+}
+.acts p {
+  margin: 0;
+  color: #aaa39a;
+  font: 400 16px/2.05 "Noto Serif SC";
+}
+.scene-note {
+  display: block;
+  color: #625d56;
+  font: 10px/1.5 Outfit;
+  letter-spacing: 0.16em;
+  margin-bottom: 14px;
+}
+.quote-heading {
+  padding: 100px 0 35px;
+}
+.quote-heading h2 {
+  font: 500 44px "Noto Serif SC";
+  margin: 12px 0;
+}
+.quotes {
+  grid-template-columns: repeat(2, 1fr);
+}
+.quote {
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.quote blockquote {
+  margin: auto 0;
+  font-size: clamp(22px, 2.2vw, 32px);
+}
+.behind {
+  display: flex;
+  flex-direction: column;
+}
+.behind article {
+  display: grid;
+  grid-template-columns: 110px minmax(240px, 360px) 1fr;
+  gap: 45px;
+  border-bottom: 1px solid var(--line);
+  padding: 80px 0;
+}
+.behind .index {
+  color: #5e5952;
+  font-size: 13px;
+}
+.behind h2 {
+  font: 500 30px/1.45 "Noto Serif SC";
+  margin: 12px 0;
+}
+.behind .content {
+  color: #aaa39a;
+  font: 400 16px/2.05 "Noto Serif SC";
+}
+.behind .content p {
+  margin: 0 0 22px;
+}
+.behind .frame {
+  border-left: 2px solid var(--gold);
+  padding-left: 22px;
+  color: #ded8ce;
+}
+.finale {
+  width: 100%;
+  margin-top: 110px;
+  padding: 110px 7vw;
+  background: radial-gradient(circle at 50% 35%, #57251e6e, transparent 58%);
+  border-top: 1px solid var(--line);
+}
+.finale > h2 {
+  font-size: clamp(48px, 6vw, 80px);
+  margin: 18px 0;
+}
+.final-copy {
+  color: #aaa39a;
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 2;
+}
+.message {
+  margin: 55px auto 35px;
+}
+.message p {
+  flex: 1;
+}
+.message small {
+  margin-top: 8px;
+}
+@media (max-width: 760px) {
+  .hub {
+    padding-left: 5vw;
+    padding-right: 5vw;
+  }
+  .mini-poster > div {
+    inset: 0 8%;
+  }
+  .mini-poster .movie-title {
+    font-size: 43px;
+  }
+  .inner {
+    padding: 25px 6vw 70px;
+  }
+  .story-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 22px;
+    min-height: 72vh;
+  }
+  .story-head h1 {
+    font-size: 44px;
+  }
+  .story-head > p {
+    font-size: 15px;
+  }
+  .synopsis-block {
+    grid-template-columns: 46px 1fr;
+    padding: 55px 0;
+  }
+  .synopsis-block > span {
+    font-size: 42px;
+  }
+  .long-summary {
+    font-size: 19px;
+  }
+  .acts article,
+  .behind article {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 50px 0;
+  }
+  .acts article h3,
+  .behind h2 {
+    font-size: 24px;
+  }
+  .quotes {
+    grid-template-columns: 1fr;
+  }
+  .quote {
+    min-height: 270px;
+    padding: 32px;
+  }
+  .behind .frame {
+    margin-top: 8px;
+  }
+  .finale {
+    padding: 75px 6vw;
+  }
+  .finale > h2 {
+    font-size: 44px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid .tile:last-child {
+    grid-column: 1/-1;
+    aspect-ratio: 2/1;
+  }
+}

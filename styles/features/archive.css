@@ -1,0 +1,650 @@
+/**
+ * [INPUT]: 依赖 styles/index.css 的固定加载顺序与 index.html 对应 DOM
+ * [OUTPUT]: 对外提供九格收藏、生成海报排版与安全区
+ * [POS]: styles/features 的收藏功能的基础视觉模块
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+/* Movie Archive — nine collectible formats */
+.grid {
+  background: #d9d0df;
+  padding: 12px;
+  gap: 10px;
+}
+.grid .tile {
+  background: #e9e1ec !important;
+  color: #241d28 !important;
+  padding: 0;
+  isolation: isolate;
+  box-shadow: 0 6px 22px #1a101d18;
+}
+.grid .tile:after {
+  display: none;
+}
+.grid .tile > div {
+  position: absolute;
+  inset: 0;
+}
+.archive-mark {
+  position: absolute !important;
+  left: 6% !important;
+  right: auto !important;
+  bottom: 5% !important;
+  z-index: 6;
+  font: 500 7px/1.45 Outfit !important;
+  letter-spacing: 0.12em;
+  text-align: left;
+  color: #f7eff7 !important;
+  text-shadow: 0 1px 5px #291b30;
+}
+.grid-poster,
+.grid-frame,
+.grid-wide,
+.grid-dialogue {
+  background-size: cover;
+  background-position: center;
+}
+.grid-poster:after,
+.grid-frame:after,
+.grid-dialogue:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #241526e8, transparent 62%);
+}
+.grid-poster b {
+  position: absolute;
+  left: 7%;
+  bottom: 24%;
+  z-index: 2;
+  color: #fff;
+  font: 600 clamp(17px, 2vw, 30px) "Noto Serif SC";
+}
+.grid-poster small {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: 15%;
+  z-index: 2;
+  color: #e8dce9;
+}
+.grid-ticket {
+  margin: 13% 5%;
+  background: #d9cce2;
+  border: 1px solid #aa92b5;
+  padding: 10%;
+  text-align: left;
+}
+.grid-ticket:before {
+  content: "";
+  position: absolute;
+  left: -6%;
+  top: 0;
+  bottom: 0;
+  border-left: 5px dotted #f2ebf3;
+}
+.grid-ticket b,
+.grid-ticket i,
+.grid-ticket small {
+  display: block;
+}
+.grid-ticket b {
+  font: 600 18px "Noto Serif SC";
+  margin: 16% 0 7%;
+}
+.grid-ticket i {
+  font-size: 9px;
+}
+.grid-ticket u {
+  display: block;
+  height: 24px;
+  margin-top: 15%;
+  background: repeating-linear-gradient(
+    90deg,
+    #45364a 0 2px,
+    transparent 2px 5px
+  );
+}
+.tile-2 .archive-mark,
+.tile-4 .archive-mark,
+.tile-7 .archive-mark {
+  color: #493e4d !important;
+  text-shadow: none;
+}
+.grid-frame time {
+  position: absolute;
+  top: 5%;
+  left: 6%;
+  color: #fff;
+  font-size: 9px;
+  z-index: 2;
+}
+.grid-frame p {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 15%;
+  color: #fff;
+  z-index: 2;
+  font: 400 13px "Noto Serif SC";
+}
+.grid-quote {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 13%;
+  text-align: left;
+  background: linear-gradient(145deg, #f5eff5, #cbb9d5);
+}
+.grid-quote:before {
+  content: "✦";
+  color: #9d7bad;
+  margin-bottom: 14%;
+}
+.grid-quote b {
+  font: 500 18px/1.8 "Noto Serif SC";
+}
+.grid-quote small {
+  margin-top: 18%;
+  font-size: 8px;
+}
+.grid-ng {
+  padding: 9%;
+  transform: rotate(-1deg);
+  background: #eee7df;
+}
+.grid-ng > div {
+  height: 58%;
+  background-size: cover;
+  background-position: center;
+  border: 10px solid #fff;
+  border-bottom-width: 26px;
+  box-shadow: 0 6px 16px #3b263322;
+}
+.grid-ng b {
+  display: block;
+  color: #9a5a85;
+  font: 500 13px cursive;
+  transform: rotate(-4deg);
+  margin-top: 5%;
+}
+.grid-ng small {
+  font-size: 8px;
+}
+.grid-wide {
+  background-position: center;
+}
+.grid-wide:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 11px solid #1e1720;
+}
+.grid-wide small {
+  position: absolute;
+  top: 6%;
+  left: 7%;
+  color: #fff;
+  font-size: 7px;
+}
+.grid-notes {
+  padding: 10%;
+  text-align: left;
+  background: #e9e0e5;
+}
+.grid-notes small {
+  letter-spacing: 0.18em;
+}
+.grid-notes b {
+  display: block;
+  margin-top: 10%;
+  color: #9971a1;
+}
+.grid-notes p {
+  font: 400 10px/1.5 "Noto Serif SC";
+}
+.grid-dialogue:after {
+  content: "";
+  position: absolute;
+  inset: 45% 0 0;
+  background: linear-gradient(0deg, #18101ddb, transparent);
+}
+.grid-dialogue small,
+.grid-dialogue b {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  z-index: 2;
+  color: #fff;
+  text-align: left;
+}
+.grid-dialogue small {
+  bottom: 29%;
+}
+.grid-dialogue b {
+  bottom: 15%;
+  font: 500 15px/1.6 "Noto Serif SC";
+}
+.grid-ending {
+  padding: 9%;
+  background: linear-gradient(#160f1d, #32213d);
+  color: white;
+  text-align: center;
+}
+.grid-ending small {
+  font-size: 8px;
+}
+.grid-ending b {
+  display: block;
+  margin-top: 26%;
+  font-size: 30px;
+  letter-spacing: 0.08em;
+}
+.grid-ending i,
+.grid-ending p {
+  display: block;
+  font: 400 10px "Noto Serif SC";
+}
+.grid-ending > div {
+  position: absolute;
+  right: 7%;
+  bottom: 7%;
+  width: 28%;
+  height: 20%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #d7c4db;
+}
+.modal #card.card-design {
+  padding: 0;
+  background: #e8deeb;
+  color: #261e29;
+}
+.card-design > div {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.detail-mark {
+  position: absolute;
+  left: 6%;
+  bottom: 3%;
+  font: 500 8px Outfit;
+  letter-spacing: 0.13em;
+  z-index: 9;
+}
+.detail-poster,
+.detail-frame,
+.detail-dialogue {
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+.detail-poster:after,
+.detail-frame:after,
+.detail-dialogue:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #160e19ee, transparent 65%);
+}
+.detail-poster > * {
+  position: absolute;
+  left: 8%;
+  z-index: 2;
+}
+.detail-poster small {
+  top: 7%;
+}
+.detail-poster h2 {
+  bottom: 22%;
+  font: 600 45px "Noto Serif SC";
+  white-space: nowrap;
+}
+.detail-poster p {
+  bottom: 15%;
+}
+.detail-poster i {
+  bottom: 9%;
+  font-size: 9px;
+}
+.card-2 {
+  aspect-ratio: 21/9 !important;
+  width: min(86vw, 980px) !important;
+  height: auto !important;
+}
+.detail-ticket {
+  background: #dfd2e7;
+  padding: 5%;
+  display: grid;
+  grid-template-columns: 1fr 45px;
+}
+.detail-ticket header,
+.detail-ticket section {
+  grid-column: 1;
+}
+.detail-ticket header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #8c7796;
+  padding-bottom: 12px;
+}
+.detail-ticket h2 {
+  font: 600 32px "Noto Serif SC";
+}
+.detail-ticket dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  font-size: 10px;
+}
+.detail-ticket dd {
+  margin: 0;
+}
+.detail-ticket blockquote {
+  position: absolute;
+  right: 8%;
+  top: 28%;
+  width: 30%;
+  font: 500 15px/1.7 "Noto Serif SC";
+}
+.detail-ticket aside {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  border-left: 1px dashed #8c7796;
+  text-align: center;
+  padding-top: 7%;
+}
+.detail-ticket .barcode {
+  width: 42%;
+  height: 34px;
+}
+.detail-frame time {
+  position: absolute;
+  top: 5%;
+  left: 6%;
+  z-index: 2;
+}
+.detail-frame p {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: 10%;
+  z-index: 2;
+  font: 500 21px "Noto Serif SC";
+}
+.detail-frame small {
+  position: absolute;
+  right: 5%;
+  top: 5%;
+}
+.detail-quote {
+  padding: 14%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(145deg, #f5eff5, #bfa8cc);
+}
+.detail-quote:before {
+  content: "✦　♡　────────";
+  color: #93739f;
+}
+.detail-quote b {
+  font: 500 31px/1.8 "Noto Serif SC";
+  margin: 25% 0;
+}
+.detail-ng {
+  padding: 10%;
+  background: #e9dfd8;
+}
+.detail-ng .polaroid {
+  height: 46%;
+  background-size: cover;
+  background-position: center;
+  border: 15px solid #fff;
+  border-bottom-width: 42px;
+  transform: rotate(-2deg);
+}
+.detail-ng > b {
+  display: block;
+  font: 500 20px cursive;
+  color: #8e527f;
+  transform: rotate(-4deg);
+}
+.detail-ng h3 {
+  font: 600 20px "Noto Serif SC";
+}
+.detail-ng p {
+  font-size: 11px;
+  line-height: 1.7;
+}
+.detail-frame.wide {
+  background-position: center;
+}
+.detail-notes {
+  padding: 10%;
+  background: #eee6eb;
+}
+.detail-notes > p {
+  letter-spacing: 0.2em;
+}
+.detail-notes section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 15%;
+}
+.detail-notes article + article {
+  border-left: 1px solid #a894aa;
+  padding-left: 30px;
+}
+.detail-notes blockquote {
+  font: 500 18px/1.8 "Noto Serif SC";
+  margin: 30px 0;
+}
+.detail-notes > i {
+  position: absolute;
+  bottom: 10%;
+  font-family: cursive;
+}
+.detail-dialogue small,
+.detail-dialogue b,
+.detail-dialogue p {
+  position: absolute;
+  left: 8%;
+  z-index: 2;
+}
+.detail-dialogue small {
+  bottom: 28%;
+}
+.detail-dialogue b {
+  right: 8%;
+  bottom: 16%;
+  font: 500 25px "Noto Serif SC";
+}
+.detail-dialogue p {
+  bottom: 9%;
+  font-size: 9px;
+}
+.detail-ending {
+  background: linear-gradient(#120d17, #2c1c35);
+  color: #eee;
+  text-align: center;
+  padding: 9%;
+}
+.detail-ending small {
+  line-height: 1.9;
+}
+.detail-ending b {
+  display: block;
+  font-size: 46px;
+  margin-top: 26%;
+}
+.detail-ending i,
+.detail-ending p {
+  display: block;
+  margin-top: 4%;
+  font: 400 13px "Noto Serif SC";
+}
+.detail-ending > div {
+  position: absolute;
+  right: 7%;
+  bottom: 6%;
+  width: 25%;
+  height: 18%;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid #cbb6d0;
+}
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 5px;
+    gap: 4px;
+  }
+  .archive-mark {
+    font-size: 5px !important;
+  }
+  .grid-poster small,
+  .grid-ticket i,
+  .grid-ng small,
+  .grid-notes p {
+    display: none;
+  }
+  .grid-ticket b {
+    font-size: 11px;
+  }
+  .grid-quote b {
+    font-size: 10px;
+  }
+  .grid-ending b {
+    font-size: 16px;
+  }
+  .grid-dialogue b {
+    font-size: 9px;
+  }
+  .card-2 {
+    width: 94vw !important;
+  }
+  .detail-ticket blockquote {
+    display: none;
+  }
+}
+
+/* Generated poster typography */
+.poster-overlay {
+  inset: 0 !important;
+  padding: 8% !important;
+  display: block !important;
+  background: linear-gradient(
+    180deg,
+    #120b1ecc 0%,
+    transparent 32%,
+    transparent 65%,
+    #120b1ee8 100%
+  ) !important;
+  border: 1px solid #d7bd7c66;
+}
+.poster-overlay .genre {
+  position: absolute;
+  left: 8%;
+  top: 5%;
+  width: auto !important;
+  margin: 0;
+  color: #e7d49e !important;
+  font: 500 9px Outfit;
+  letter-spacing: 0.22em;
+}
+.poster-overlay .movie-title {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 8%;
+  width: 84% !important;
+  margin: 0;
+  color: #fff;
+  font-family: "Noto Serif SC", serif !important;
+  font-weight: 600 !important;
+  text-shadow: 0 3px 22px #1c1022;
+  letter-spacing: -0.055em !important;
+}
+.poster-overlay .slogan {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 17%;
+  width: 84% !important;
+  margin: 0;
+  color: #eee4ef;
+  font: 400 13px/1.7 "Noto Serif SC";
+  letter-spacing: 0.06em;
+}
+.poster-overlay .poster-credit {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 6%;
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 1.25fr;
+  gap: 12px;
+  padding-top: 15px;
+  border-top: 1px solid #d7bd7c88;
+  color: #fff;
+  font: 500 10px/1.5 "Noto Serif SC";
+  letter-spacing: 0.03em;
+}
+.poster-credit span {
+  display: block;
+}
+.poster-credit small {
+  display: block;
+  margin-bottom: 5px;
+  color: #d7bd7c;
+  font: 500 7px Outfit;
+  letter-spacing: 0.16em;
+}
+.poster-stage:before {
+  content: "✦";
+  position: absolute;
+  z-index: 4;
+  color: #e5ce91;
+  pointer-events: none;
+}
+.mini-poster {
+  box-shadow:
+    0 25px 80px #000,
+    0 0 0 1px #b99d6450;
+}
+@media (max-width: 760px) {
+  .poster-overlay .movie-title {
+    top: 9%;
+    font-size: 32px !important;
+  }
+  .poster-overlay .slogan {
+    top: 17%;
+    font-size: 11px;
+  }
+  .poster-overlay .poster-credit {
+    grid-template-columns: 1.1fr 0.7fr 1.2fr;
+    font-size: 8px;
+    gap: 6px;
+  }
+}
+
+/* Final typography + safe-area system */
+:root {
+  --ui-bg: #070707;
+  --ui-ink: #f5f2ec;
+  --ui-sub: #b6b0a7;
+  --ui-muted: #8c877f;
+  --ui-line: #2c2a27;
+  --ui-panel: #11100f;
+  --ui-paper: #eee9df;
+  --ui-paper-2: #d9d1c3;
+  --ui-accent: #c9b37d;
+  --ui-lav: #b9adbd;
+  --safe-x: clamp(24px, 6vw, 88px);
+  --grid-8: 8px;
+}

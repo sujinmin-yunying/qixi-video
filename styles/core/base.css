@@ -1,0 +1,649 @@
+/**
+ * [INPUT]: 依赖 styles/index.css 的固定加载顺序与 index.html 对应 DOM
+ * [OUTPUT]: 对外提供页面基础、首屏、通用组件与首版移动端样式
+ * [POS]: styles/core 的样式系统的基础层，被全部页面消费
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+/**
+ * [INPUT]: 依赖 index.html 的页面结构与 assets/ 视觉素材
+ * [OUTPUT]: 对外提供活动完整响应式视觉与交互动效样式
+ * [POS]: styles/core 的全局基础层，被全部页面与功能样式消费
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Outfit:wght@300;500&display=swap");
+:root {
+  --bg: #090808;
+  --paper: #eee4d1;
+  --gold: #c4a46b;
+  --red: #682820;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--paper);
+  font-family: Outfit, "Noto Serif SC", serif;
+}
+.page {
+  display: none;
+  min-height: 100svh;
+}
+.page.active {
+  display: flex;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+.landing {
+  padding: 32px 5vw 7vh;
+  background:
+    linear-gradient(90deg, #080707f2 5%, #0807076b 55%, #080707da),
+    url("/assets/cinema-abstract.png") center/cover;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4vw;
+}
+.landing nav,
+.hub nav {
+  position: absolute;
+  top: 32px;
+  left: 5vw;
+  right: 5vw;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+}
+.landing-copy {
+  width: 48%;
+  max-width: 690px;
+}
+.kicker {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+}
+h1 {
+  font: 600 clamp(48px, 6vw, 90px) / 1.1 "Noto Serif SC";
+  margin: 20px 0;
+}
+.landing-copy h2 {
+  font: 400 18px "Noto Serif SC";
+}
+.prologue {
+  display: flex;
+  gap: 16px;
+  margin-top: 50px;
+  color: #c7bdad;
+  line-height: 1.9;
+}
+.prologue span {
+  color: var(--gold);
+}
+.setup {
+  margin-left: auto;
+  width: min(42%, 520px);
+  padding: 30px;
+  background: #100e0dd9;
+  border: 1px solid #63543d80;
+  backdrop-filter: blur(18px);
+}
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #3c342b;
+  margin-bottom: 25px;
+}
+.tab {
+  flex: 1;
+  border: 0;
+  background: none;
+  color: #777;
+  padding: 12px;
+}
+.tab.on {
+  color: var(--paper);
+  border-bottom: 1px solid var(--gold);
+}
+.tabbody {
+  display: none;
+}
+.tabbody.on {
+  display: block;
+}
+label {
+  display: block;
+  color: #a99e8e;
+  font-size: 12px;
+  margin: 18px 0;
+}
+input,
+textarea {
+  width: 100%;
+  background: #151310;
+  border: 1px solid #40382e;
+  color: white;
+  padding: 14px;
+  margin-top: 8px;
+  outline: none;
+}
+.types {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.types button {
+  background: none;
+  border: 1px solid #494036;
+  color: #aaa;
+  padding: 8px 10px;
+  font-size: 11px;
+}
+.types button.selected {
+  border-color: var(--gold);
+  color: var(--paper);
+}
+.primary,
+.outline {
+  padding: 15px 24px;
+  border: 1px solid var(--gold);
+}
+.primary {
+  background: var(--paper);
+  color: #18120d;
+}
+.setup > .primary {
+  width: 100%;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+.drop {
+  border: 1px dashed #5b4c3b;
+  text-align: center;
+  padding: 26px;
+}
+.drop b,
+.drop strong,
+.drop span {
+  display: block;
+  margin: 6px;
+}
+.drop b {
+  font-size: 28px;
+}
+.drop input {
+  display: none;
+}
+textarea {
+  min-height: 90px;
+}
+.trailer {
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: #030202 url("/assets/cinema-abstract.png") center/cover;
+}
+.trailer:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #0008;
+}
+.vortex {
+  position: absolute;
+  width: min(70vw, 700px);
+  aspect-ratio: 1;
+  border: 1px solid #c6aa7140;
+  border-radius: 50%;
+  box-shadow:
+    0 0 100px #e7bb6440,
+    0 0 200px #6b1e1870;
+  animation: pulse 2s infinite;
+  z-index: 1;
+}
+.trailer-line {
+  font: 600 clamp(34px, 5vw, 70px) "Noto Serif SC";
+  z-index: 3;
+  text-align: center;
+}
+.wordstorm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.wordstorm i {
+  position: absolute;
+  font-style: normal;
+  color: #f0dcb9;
+  animation: pull 2.5s forwards;
+}
+.skip {
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  z-index: 4;
+  background: none;
+  color: #aaa;
+  border: 0;
+  border-bottom: 1px solid #777;
+}
+.hub {
+  padding: 100px 6vw 5vw;
+  gap: 7vw;
+  align-items: center;
+}
+.link {
+  background: none;
+  border: 0;
+  color: var(--paper);
+}
+.mini-poster {
+  width: 43vw;
+  height: 75vh;
+  min-height: 600px;
+  background:
+    linear-gradient(0deg, #090808ed, transparent),
+    url("/assets/cinema-abstract.png") center/cover;
+  position: relative;
+}
+.mini-poster > div {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+}
+.movie-title {
+  font: 600 clamp(40px, 5vw, 72px) "Noto Serif SC";
+  margin: 12px 0;
+}
+.hubcopy {
+  max-width: 570px;
+}
+.summary {
+  color: #b4aa9b;
+  line-height: 2;
+}
+.navcards {
+  display: grid;
+  gap: 8px;
+  margin-top: 30px;
+}
+.navcards button {
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  text-align: left;
+  align-items: center;
+  padding: 20px;
+  background: #13110f;
+  border: 1px solid #332d27;
+  color: #ddd;
+}
+.navcards b {
+  color: var(--gold);
+}
+.navcards strong {
+  font: 500 18px "Noto Serif SC";
+}
+.navcards span {
+  font-size: 11px;
+  color: #81786d;
+}
+.inner {
+  display: none;
+  flex-direction: column;
+  padding: 28px 6vw 8vw;
+}
+.inner.active {
+  display: flex;
+}
+.inner header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+.intro {
+  margin: 9vh 0 6vh;
+  max-width: 800px;
+}
+.intro h1 {
+  font-size: clamp(42px, 5vw, 72px);
+}
+.acts,
+.egggrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.acts article,
+.egggrid article {
+  padding: 35px;
+  min-height: 260px;
+  border: 1px solid #302a24;
+  background: #100e0d;
+}
+.acts i,
+.egggrid i {
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+.acts h3,
+.egggrid h3 {
+  font: 500 22px "Noto Serif SC";
+  margin-top: 45px;
+}
+.acts p,
+.egggrid p {
+  color: #9e9588;
+  line-height: 1.9;
+}
+.section-title {
+  margin-top: 10vh;
+  font: 500 34px "Noto Serif SC";
+}
+.quotes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.quote {
+  background: var(--paper);
+  color: #251d17;
+  padding: 45px;
+  min-height: 260px;
+  position: relative;
+}
+.quote:before {
+  content: "♡  ✦  ───";
+  color: #9f7655;
+}
+.quote blockquote {
+  font: 500 24px/1.7 "Noto Serif SC";
+  margin: 35px 0;
+}
+.quote button {
+  background: none;
+  border: 1px solid #836f5a;
+  padding: 8px;
+}
+.finale {
+  margin: 12vh auto 0;
+  text-align: center;
+  width: min(760px, 100%);
+  padding: 8vh 5vw;
+  background: radial-gradient(circle, #5a241a80, transparent 65%);
+}
+.finale h2 {
+  font: 600 54px "Noto Serif SC";
+}
+.message {
+  display: flex;
+  gap: 12px;
+  text-align: left;
+  background: #f2eee8;
+  color: #201c18;
+  padding: 16px;
+  border-radius: 18px;
+  width: min(360px, 90%);
+  margin: 40px auto;
+}
+.avatar {
+  background: #652b25;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.message p {
+  margin: 0;
+  line-height: 1.6;
+}
+.message small {
+  display: block;
+  color: #999;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.tile {
+  aspect-ratio: 1;
+  border: 0;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+  padding: 20px;
+  background: #191512;
+}
+.tile:nth-child(1),
+.tile:nth-child(6) {
+  background: url("/assets/cinema-abstract.png") center/cover;
+}
+.tile:nth-child(2) {
+  background: #e7dcc4;
+  color: #2b2118;
+  border: 12px solid #711f1d;
+}
+.tile:nth-child(3) {
+  background: radial-gradient(
+    circle at 70% 30%,
+    #e5bf7b,
+    #50251e 20%,
+    #090808 65%
+  );
+}
+.tile:nth-child(4),
+.tile:nth-child(8) {
+  background: #eae0cd;
+  color: #251e18;
+}
+.tile:nth-child(5) {
+  background: repeating-linear-gradient(
+    125deg,
+    #151313,
+    #151313 18px,
+    #201b18 18px,
+    #201b18 36px
+  );
+}
+.tile:nth-child(7) {
+  background: #33251c;
+}
+.tile:nth-child(9) {
+  background: radial-gradient(circle, #812f26, #080707 65%);
+}
+.tile:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #000b, transparent);
+}
+.tile:nth-child(2):after,
+.tile:nth-child(4):after,
+.tile:nth-child(8):after {
+  display: none;
+}
+.tile span,
+.tile em {
+  position: absolute;
+  z-index: 2;
+}
+.tile span {
+  left: 8%;
+  bottom: 8%;
+  font: 500 18px "Noto Serif SC";
+}
+.tile em {
+  right: 7%;
+  top: 7%;
+  font-style: normal;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  background: #080707f7;
+  display: none;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal.open {
+  display: flex;
+}
+.x {
+  position: absolute;
+  right: 4vw;
+  top: 3vh;
+  background: none;
+  color: white;
+  border: 0;
+  font-size: 32px;
+}
+#card {
+  width: min(560px, 90vw);
+  aspect-ratio: 4/5;
+  background: #e9dfcc;
+  color: #211a14;
+  padding: 9%;
+  position: relative;
+  overflow: hidden;
+}
+.card-poster {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, #070606e8, transparent),
+    url("/assets/cinema-abstract.png") center/cover;
+  color: #fff;
+  padding: 9%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.ticket {
+  height: 100%;
+  border: 2px solid #722a22;
+  padding: 7%;
+  position: relative;
+}
+.ticket h2 {
+  font: 600 40px "Noto Serif SC";
+}
+.barcode {
+  height: 55px;
+  background: repeating-linear-gradient(
+    90deg,
+    #18130f 0 2px,
+    transparent 2px 5px,
+    #18130f 5px 6px,
+    transparent 6px 9px
+  );
+  margin-top: 40px;
+}
+.outline {
+  background: none;
+  color: white;
+}
+@keyframes pulse {
+  50% {
+    transform: scale(0.88);
+    box-shadow: 0 0 160px #f0c47b60;
+  }
+}
+@keyframes pull {
+  to {
+    left: 50%;
+    top: 50%;
+    transform: scale(0.1);
+    opacity: 0;
+  }
+}
+@media (max-width: 760px) {
+  .landing {
+    padding: 80px 6vw 30px;
+    display: none;
+    align-items: flex-start;
+    background-position: center;
+  }
+  .landing.active {
+    display: flex;
+  }
+  .landing-copy,
+  .setup {
+    width: 100%;
+    max-width: none;
+  }
+  .landing-copy h1 {
+    font-size: 48px;
+  }
+  .prologue {
+    margin: 28px 0;
+  }
+  .setup {
+    padding: 20px;
+  }
+  .hub {
+    display: none;
+    flex-direction: column;
+    padding: 85px 5vw 30px;
+    align-items: stretch;
+  }
+  .hub.active {
+    display: flex;
+  }
+  .mini-poster {
+    width: 100%;
+    height: 62vh;
+    min-height: 480px;
+  }
+  .navcards button {
+    grid-template-columns: 40px 1fr;
+  }
+  .navcards span {
+    display: none;
+  }
+  .acts,
+  .egggrid,
+  .quotes {
+    grid-template-columns: 1fr;
+  }
+  .grid {
+    gap: 5px;
+  }
+  .tile {
+    padding: 8px;
+  }
+  .tile span {
+    font-size: 12px;
+  }
+  .inner {
+    padding: 25px 5vw 60px;
+  }
+  .intro {
+    margin-top: 7vh;
+  }
+  .intro h1 {
+    font-size: 40px;
+  }
+  .finale h2 {
+    font-size: 40px;
+  }
+}

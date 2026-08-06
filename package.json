@@ -3,7 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "APP_ENV=local node scripts/server.js",
+    "dev:test": "APP_ENV=test node --env-file-if-exists=.env.test scripts/server.js",
+    "start": "APP_ENV=prod node --env-file-if-exists=.env.prod scripts/server.js",
+    "check": "node --check src/app.js && node --check scripts/server.js && node --check api/_runtime.js && node --check api/runtime-config.js && node --check api/_poster-core.js && node --check api/generate-poster.js && node --check api/poster-task.js && node --check api/recognize-chat.js"
+  },
   "dependencies": {
-    "@vercel/functions": "latest"
+    "@vercel/functions": "3.8.0"
   }
 }

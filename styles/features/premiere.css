@@ -1,0 +1,352 @@
+/**
+ * [INPUT]: 依赖 styles/index.css 的固定加载顺序与 index.html 对应 DOM
+ * [OUTPUT]: 对外提供首映画廊的封套、拆封动画与响应式布局
+ * [POS]: styles/features 的收藏功能的首映交互模块
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+/* 2026-07-29 电影首映画廊 · sealed premiere archive */
+#gallery .gallery-intro {
+  padding-bottom: 42px !important;
+}
+#gallery .gallery-intro h1 {
+  margin-bottom: 4px !important;
+}
+#gallery .gallery-subtitle {
+  margin: 0 !important;
+  color: #bdb5c6 !important;
+  font:
+    500 15px/1.8 "Noto Serif SC",
+    serif !important;
+  letter-spacing: 0.08em !important;
+}
+#gallery .gallery-meta {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  width: min(680px, 100%) !important;
+  margin-top: 8px !important;
+}
+#gallery .gallery-meta span {
+  min-width: 0 !important;
+  padding: 18px 20px !important;
+  border: 1px solid #3d3836 !important;
+  background: linear-gradient(145deg, #f0e8d814, #8f7aa018) !important;
+  text-align: left !important;
+}
+#gallery .gallery-meta small {
+  display: block !important;
+  margin-bottom: 6px !important;
+  color: #8f8987 !important;
+  font:
+    500 10px/1.4 Outfit,
+    "Noto Serif SC",
+    serif !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+}
+#gallery .gallery-meta b {
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: #f0ece4 !important;
+  font:
+    600 18px/1.35 "Noto Serif SC",
+    serif !important;
+}
+#gallery .gallery-meta .movie-title {
+  margin: 0 !important;
+  font-size: 18px !important;
+  letter-spacing: 0 !important;
+  text-align: left !important;
+}
+#gallery .gallery-footer {
+  width: min(720px, 100%) !important;
+  margin: 28px auto 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 22px !important;
+  color: #cfc8bf !important;
+}
+#gallery .gallery-footer p {
+  margin: 0 !important;
+  font:
+    500 14px/1.7 "Noto Serif SC",
+    serif !important;
+}
+#gallery .gallery-count {
+  color: #f1e9d8 !important;
+  font-family: Outfit, "Noto Serif SC", serif !important;
+  letter-spacing: 0.08em !important;
+}
+#gallery .gallery-next:disabled {
+  opacity: 0.48 !important;
+  cursor: default !important;
+}
+#gallery .grid {
+  background:
+    radial-gradient(circle at 50% 20%, #b9a5c817, transparent 34%),
+    linear-gradient(180deg, #12100f, #0c0b0b) !important;
+  border-color: #352f31 !important;
+  box-shadow:
+    inset 0 0 0 1px #ffffff06,
+    0 24px 80px #0005 !important;
+}
+#gallery .grid .tile {
+  perspective: 900px !important;
+  transform-style: preserve-3d !important;
+  background: #171412 !important;
+  border: 1px solid #312b2a !important;
+  transition:
+    transform 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease !important;
+}
+#gallery .grid .tile:hover {
+  transform: translateY(-2px) !important;
+  border-color: #6d625c !important;
+  box-shadow: 0 16px 40px #0006 !important;
+}
+#gallery .grid .tile .tile-content {
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0 !important;
+  transform: scale(0.965) !important;
+  transition:
+    opacity 0.34s ease 0.42s,
+    transform 0.5s ease 0.36s !important;
+  pointer-events: none !important;
+}
+#gallery .grid .tile.opened .tile-content {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+#gallery .grid .tile.locked .archive-card,
+#gallery .grid .tile.opening .archive-card {
+  visibility: hidden !important;
+}
+#gallery .grid .tile.opened .archive-card {
+  visibility: visible !important;
+}
+#gallery .grid .tile .sealed-cover {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 20 !important;
+  display: grid !important;
+  place-items: center !important;
+  align-content: center !important;
+  gap: 10px !important;
+  padding: 18px !important;
+  text-align: center !important;
+  color: #28221d !important;
+  background:
+    linear-gradient(90deg, #0000 0 9%, #7b695830 9.4% 10.2%, #0000 10.6% 100%),
+    repeating-linear-gradient(0deg, #00000005 0 1px, #ffffff05 1px 3px),
+    radial-gradient(circle at 74% 22%, #b9a4c024, transparent 28%),
+    linear-gradient(145deg, #eee3cf, #cfc1ab 52%, #ede3d2) !important;
+  border: 1px solid #e6dac7 !important;
+  box-shadow:
+    inset 0 0 0 8px #e8ddcc,
+    inset 0 0 0 9px #b8a891,
+    0 12px 35px #0008 !important;
+  transform-origin: 50% 52% !important;
+  transition:
+    opacity 0.28s ease,
+    transform 0.42s ease !important;
+}
+#gallery .grid .tile .sealed-cover:before {
+  content: "" !important;
+  position: absolute !important;
+  left: 14px !important;
+  right: 14px !important;
+  top: 14px !important;
+  height: 26px !important;
+  background:
+    repeating-linear-gradient(90deg, #2b2420 0 8px, transparent 8px 16px),
+    linear-gradient(#4c4039, #2b2522) !important;
+  opacity: 0.2 !important;
+  border-radius: 3px !important;
+}
+#gallery .grid .tile .sealed-cover:after {
+  content: "PREMIERE ARCHIVE" !important;
+  position: absolute !important;
+  left: 18px !important;
+  right: 18px !important;
+  bottom: 16px !important;
+  color: #7f6f83 !important;
+  font:
+    500 8px/1.3 Outfit,
+    "Noto Serif SC",
+    serif !important;
+  letter-spacing: 0.16em !important;
+}
+#gallery .grid .tile .sealed-cover i {
+  position: static !important;
+  display: block !important;
+  color: #8a6f50 !important;
+  font:
+    600 12px/1 Outfit,
+    "Noto Serif SC",
+    serif !important;
+  letter-spacing: 0.18em !important;
+  font-style: normal !important;
+}
+#gallery .grid .tile .sealed-cover b {
+  display: block !important;
+  max-width: 100% !important;
+  color: #211d19 !important;
+  font:
+    600 clamp(17px, 1.6vw, 25px) / 1.3 "Noto Serif SC",
+    serif !important;
+  letter-spacing: 0 !important;
+}
+#gallery .grid .tile .sealed-cover small {
+  position: static !important;
+  display: block !important;
+  justify-self: center !important;
+  color: #8f8793 !important;
+  font:
+    500 10px/1.4 "Noto Serif SC",
+    serif !important;
+  letter-spacing: 0.16em !important;
+}
+#gallery .grid .tile .sealed-cover u {
+  position: absolute !important;
+  width: 58px !important;
+  height: 58px !important;
+  right: 18px !important;
+  top: 48px !important;
+  border-radius: 50% !important;
+  border: 1px solid #8e748e70 !important;
+  background: radial-gradient(
+    circle,
+    #8e748e2a 0 42%,
+    transparent 44%
+  ) !important;
+  text-decoration: none !important;
+  transform: rotate(-12deg) !important;
+}
+#gallery .grid .tile.opening {
+  z-index: 8 !important;
+  animation: premiere-shake 0.74s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
+}
+#gallery .grid .tile.opening .sealed-cover {
+  animation: premiere-open 0.82s cubic-bezier(0.2, 0.8, 0.18, 1) forwards !important;
+}
+#gallery .grid .tile.opening .sealed-cover:before {
+  animation: film-unroll 0.82s cubic-bezier(0.2, 0.8, 0.18, 1) forwards !important;
+}
+#gallery .grid .tile.opened .sealed-cover {
+  opacity: 0 !important;
+  transform: rotateX(-76deg) translateY(-18px) scale(0.98) !important;
+  pointer-events: none !important;
+}
+#gallery .grid .tile.opened:before {
+  content: "已收藏" !important;
+  position: absolute !important;
+  right: 10px !important;
+  top: 10px !important;
+  z-index: 30 !important;
+  padding: 4px 7px !important;
+  color: #6e5f4e !important;
+  background: #f0e8d9dd !important;
+  border: 1px solid #cdbfae !important;
+  font:
+    500 8px/1 Outfit,
+    "Noto Serif SC",
+    serif !important;
+  letter-spacing: 0.12em !important;
+}
+@keyframes premiere-shake {
+  0% {
+    transform: scale(1);
+  }
+  18% {
+    transform: scale(1.045) rotate(-0.45deg);
+  }
+  36% {
+    transform: scale(1.045) rotate(0.45deg);
+  }
+  54% {
+    transform: scale(1.035) rotate(-0.25deg);
+  }
+  74% {
+    transform: scale(1.02) rotate(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes premiere-open {
+  0% {
+    transform: rotateX(0) translateY(0);
+    opacity: 1;
+  }
+  42% {
+    transform: rotateX(-12deg) translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateX(-82deg) translateY(-24px) scale(0.96);
+    opacity: 0;
+  }
+}
+@keyframes film-unroll {
+  0% {
+    left: 14px;
+    right: 14px;
+    opacity: 0.2;
+  }
+  52% {
+    left: -12px;
+    right: -12px;
+    opacity: 0.34;
+  }
+  100% {
+    left: -40px;
+    right: -40px;
+    opacity: 0;
+  }
+}
+@media (max-width: 760px) {
+  #gallery .gallery-meta {
+    grid-template-columns: 1fr !important;
+  }
+  #gallery .gallery-footer {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  #gallery .gallery-next {
+    width: 100% !important;
+  }
+  #gallery .grid .tile .sealed-cover {
+    padding: 8px !important;
+    box-shadow:
+      inset 0 0 0 4px #e8ddcc,
+      inset 0 0 0 5px #b8a891,
+      0 8px 22px #0007 !important;
+  }
+  #gallery .grid .tile .sealed-cover:before {
+    left: 7px !important;
+    right: 7px !important;
+    top: 7px !important;
+    height: 14px !important;
+  }
+  #gallery .grid .tile .sealed-cover i {
+    font-size: 8px !important;
+  }
+  #gallery .grid .tile .sealed-cover b {
+    font-size: 11px !important;
+  }
+  #gallery .grid .tile .sealed-cover small {
+    font-size: 7px !important;
+  }
+  #gallery .grid .tile .sealed-cover u {
+    width: 28px !important;
+    height: 28px !important;
+    right: 9px !important;
+    top: 26px !important;
+  }
+}

@@ -1,3 +1,12 @@
+/**
+ * [INPUT]: 依赖 ./_runtime.js 的远程环境守卫及服务端 OpenAI/火山配置
+ * [OUTPUT]: 对外提供 getPosterProviderConfig、generatePosterImage
+ * [POS]: api 的图像生成核心，被同步与异步海报入口复用
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
+import {assertRemoteEnv} from './_runtime.js';
+
 const compositions=[
   'cinematic object-storytelling still life using several meaningful props from the plot',
   'full environmental movie scene showing the exact story location after an important event',
@@ -51,6 +60,7 @@ Strictly avoid abstract geometry, simple line icons, outline-only objects, circl
 }
 
 export function getPosterProviderConfig(){
+  assertRemoteEnv();
   const provider=(process.env.IMAGE_PROVIDER||'').toLowerCase()||((process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY)?'ark':'openai');
   const arkKey=process.env.ARK_API_KEY||process.env.VOLCENGINE_API_KEY;
   const openaiKey=process.env.OPENAI_API_KEY;

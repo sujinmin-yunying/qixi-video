@@ -1,3 +1,10 @@
+/**
+ * [INPUT]: 依赖 ./_poster-core.js 的海报生成能力与进程内任务表
+ * [OUTPUT]: 对外提供海报任务提交和轮询 Vercel handler
+ * [POS]: api 的异步海报入口；任务表非持久化，正式扩容前需替换为共享任务存储
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+
 import {generatePosterImage,getPosterProviderConfig} from './_poster-core.js';
 
 export const config={maxDuration:300};
