@@ -25,9 +25,9 @@ npm run check
 | --- | --- | --- | --- |
 | local | `npm run dev` | 浏览器假角色、假聊天、静态 mock 海报 | 不需要 token；服务器拒绝真实 OCR/海报 API |
 | test | 复制 `.env.example` 为 `.env.test` 后运行 `npm run dev:test` | 测试密钥调用真实 OCR/图像模型 | 失败直接报错，绝不回退 mock；必须使用隔离的测试账号和服务 |
-| prod | 部署平台显式设置 `APP_ENV=prod`；本机仅可用 `.env.prod` + `npm start` 验证 | 正式服务端配置调用真实模型 | 不接受 URL 切换环境/API；密钥不下发浏览器 |
+| prod | Vercel Production 自动映射；其他平台设置 `APP_ENV=prod`；本机仅可用 `.env.prod` + `npm start` 验证 | 正式服务端配置调用真实模型 | 不接受 URL 切换环境/API；密钥不下发浏览器 |
 
-`APP_ENV` 必填且只接受 `local`、`test`、`prod`。没有配置时页面显示 `ENV · NOT CONFIGURED`，不会默认连接正式服务。
+`APP_ENV` 优先级最高且只接受 `local`、`test`、`prod`。未显式设置时，Vercel 的 `development`、`preview`、`production` 分别映射为 `local`、`test`、`prod`；其他平台没有配置时页面显示 `ENV · NOT CONFIGURED`，不会默认连接正式服务。
 
 ## 服务端变量
 
